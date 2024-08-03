@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import BottomNav from "@/components/dashboard/BottomNav";
 import FeatureButtons from "@/components/dashboard/Features";
