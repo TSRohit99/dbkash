@@ -1,33 +1,31 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import 'tailwindcss/base';
+@import 'tailwindcss/components';
+@import 'tailwindcss/utilities';
+
+html{
+  scroll-behavior: smooth;
+}
 
 :root {
-  --foreground-rgb: 0, 0, 0;
-  --background-start-rgb: 214, 219, 220;
-  --background-end-rgb: 255, 255, 255;
+  --neutral-400: #b7b4c7;
+  --customBlue: #09162e;
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground-rgb: 255, 255, 255;
-    --background-start-rgb: 0, 0, 0;
-    --background-end-rgb: 0, 0, 0;
-  }
-}
-
 body {
-  color: rgb(var(--foreground-rgb));
-  background: linear-gradient(
-      to bottom,
-      transparent,
-      rgb(var(--background-end-rgb))
-    )
-    rgb(var(--background-start-rgb));
+  color: var(--neutral-400);
+  background-color: var(--customBlue);
+  font-family: Thicccboi, sans-serif;
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.667em;
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+@keyframes slideIn {
+  0% {
+    opacity: 0;
+    transform: translateZ(-200px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateZ(0);
   }
 }
