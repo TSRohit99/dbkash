@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { FaBars, FaTimes } from 'react-icons/fa'
 import QuickOverviewModal from './QuickOverviewModal'
+import ConnectMetamask from '../dashboard/ConnectWallet'
 
 const navItems = [
   { name: 'Swap', href: '#' },
@@ -16,6 +17,7 @@ const navItems = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false)
   const [show, setShow] = useState(true);
   const [scrollPos, setScrollPos] = useState(0);
 
@@ -65,7 +67,9 @@ export default function Navbar() {
         <button onClick={()=> setIsModalOpen(true)}> Quick Overview </button>
         </div>
 
-        <button className="hidden md:block bg-[#2669f5] text-white px-3 py-1.5 rounded-lg font-medium hover:bg-opacity-90 transition duration-300">
+        <button onClick={()=>{ 
+          setIsModalOpen(false)
+          setIsWalletModalOpen(true)}} className="hidden md:block bg-[#2669f5] text-white px-3 py-1.5 rounded-lg font-medium hover:bg-opacity-90 transition duration-300">
           Connect Wallet
         </button>
 
@@ -95,15 +99,22 @@ export default function Navbar() {
           ))
           
         }
-        <button onClick={()=> setIsModalOpen(true)} className='ml-4 mt-2 mb-2 '> Quick Overview </button>
+        <button onClick={()=>{ 
+          setIsModalOpen(false)
+          setIsWalletModalOpen(true)}} className='ml-4 mt-2 mb-2 '> Quick Overview </button>
          <div className=' flex items-center justify-center'>
-         <button className="block text-left  bg-[#1199fa] text-white px-4 py-2 mt-2 rounded-lg font-medium hover:bg-opacity-90 transition duration-300">
-            Connect Wallet
-          </button>
+
+          <button onClick={()=>{ 
+          setIsModalOpen(false)
+          setIsOpen(false)
+          setIsWalletModalOpen(true)}} className="block text-left  bg-[#1199fa] text-white px-4 py-2 mt-2 rounded-lg font-medium hover:bg-opacity-90 transition duration-300">
+          Connect Wallet
+        </button>
          </div>
         </div>
       )}
       <QuickOverviewModal isOpen={isModalOpen} onClose={()=>setIsModalOpen(false)} />
+      <ConnectMetamask isOpen={isWalletModalOpen} onClose={()=>setIsWalletModalOpen(false)} />
     </nav>
   )
 } 

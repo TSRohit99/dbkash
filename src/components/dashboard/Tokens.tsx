@@ -2,6 +2,7 @@ export default function TokensList() {
   const tokensList = [
     { name: "Bangladeshi Digital Taka", ticker: "BDT", value: 10000 },
     { name: "United States Dollars", ticker: "USD", value: 100 },
+  
   ];
   const usdPrice = 118;
 

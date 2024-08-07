@@ -1,14 +1,15 @@
-
+"use client"
 
 import React from 'react';
 import Head from 'next/head';
-import HeroSection from '@/components/HeroSection';
-import Statistics from '@/components/Statistics';
-import About from '@/components/About';
-import Footer from '@/components/Footer';
-import Announcements from '@/components/Announcements';
-import FAQ from '@/components/FAQ';
-import Navbar from '@/components/Navbar';
+import HeroSection from '@/components/landingPage/HeroSection';
+import Statistics from '@/components/landingPage/Statistics';
+import About from '@/components/landingPage/About';
+import Footer from '@/components/landingPage/Footer';
+import Announcements from '@/components/landingPage/Announcements';
+import FAQ from '@/components/landingPage/FAQ';
+import Navbar from '@/components/landingPage/Navbar';
+
 
 export default function Home() {
   return (
@@ -22,6 +23,8 @@ export default function Home() {
         <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
         <link rel="manifest" href="./site.webmanifest" />
       </Head>
+ 
+      
       <Navbar />
 
       <main className="md:pt-28 pt-7">
@@ -32,6 +35,7 @@ export default function Home() {
       <About />
       <Footer />
       </main>
+
     </div>
   );
 }
