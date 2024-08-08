@@ -95,7 +95,7 @@ export const switchToArbitrumSepolia = async (): Promise<ConnectResponse> => {
         }
       }
       console.error('Failed to switch to Arbitrum Sepolia:', error);
-      return { success: false, error: 'Failed to switch network' };
+      return { success: false, error: 'Failed to switch network. Add the following RPC https://chainlist.org/chain/421614' };
     }
   } else {
     return { success: false, error: 'MetaMask not detected' };
