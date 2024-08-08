@@ -23,7 +23,10 @@ const ConnectMetamask: React.FC<ModalProps> = ({ isOpen, onClose }) => {
       toast.success("Successfully logged in!");
       onClose();
     } else {
-      toast.error(res?.error || "Failed to connect wallet.");
+      if(res?.error)
+      toast.error( res.error);
+    else
+      toast.error("Failed to connect wallet.");
     }
   };
 

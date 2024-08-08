@@ -26,10 +26,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (response.success && response.address) {
       setAddress(response.address);
       localStorage.setItem('walletAddress', response.address); // Save address to localStorage
-      return response;
     } else {
       console.error(response.error);
     }
+    return response;
   }, []);
 
   const disconnect = useCallback(() => {

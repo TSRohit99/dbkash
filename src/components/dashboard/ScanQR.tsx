@@ -83,9 +83,6 @@ const QRScanner: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         </button>
         <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Scan QR Code</h2>
         <div id="reader" className="mb-6"></div>
-        {error && (
-          <p className="text-red-500 text-sm text-center mb-4">{error}</p>
-        )}
         <p className="text-gray-600 text-center mt-4 text-sm">
           Position the QR code within the frame to scan.
         </p>

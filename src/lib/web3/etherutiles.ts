@@ -52,7 +52,7 @@ export const connectWallet = async (): Promise<ConnectResponse> => {
       return { success: true, address };
     } catch (error) {
       console.error('Failed to connect wallet:', error);
-      return { success: false, error: 'Failed to connect wallet' };
+      return { success: false, error: 'Failed to connect wallet, check your metamask' };
     }
   } else {
     return { success: false, error: 'MetaMask not detected' };
