@@ -56,7 +56,7 @@ const Announcements = () => {
               alt={announcements[currentIndex].title}
               width={900}
               height={500}
-              objectFit="cover"
+              className="object-cover"
             />
           </div>
           </div>

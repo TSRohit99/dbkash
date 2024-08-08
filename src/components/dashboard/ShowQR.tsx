@@ -26,7 +26,7 @@ const WalletQR: React.FC<WalletQRProps> = ({ address,isOpen, onClose }) => {
         </button>
         <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Scan to Send Funds</h2>
         <div className="flex justify-center mb-6">
-          <QRCodeSVG value={address} size={200} />
+          <QRCodeSVG value={address || "Not found"} size={200} />
         </div>
         <div className="bg-gray-100 p-4 rounded-lg flex items-center justify-between mb-4">
           <span className="text-sm text-gray-600 truncate mr-2">{address}</span>

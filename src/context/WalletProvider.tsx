@@ -8,7 +8,6 @@ interface WalletContextType {
   address: string | null;
   connect: () => Promise<ConnectResponse | undefined>;
   disconnect: () => void;
-  switchNetwork: () => Promise<void>;
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -39,13 +38,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     // Add MetaMask disconnect logic here if applicable
   }, []);
 
-  const switchNetwork = useCallback(async () => {
-    const response: ConnectResponse = await switchToArbitrumSepolia();
-    if (!response.success) {
-      console.error(response.error);
-    }
-  }, []);
-
 
   return (
     <WalletContext.Provider
@@ -53,7 +45,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         address,
         connect,
         disconnect,
-        switchNetwork,
       }}
     >
       {children}

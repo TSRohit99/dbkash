@@ -12,9 +12,10 @@ import { LuLogOut } from "react-icons/lu";
 import Link from "next/link";
 import WalletQR from "./ShowQR";
 import { copyToClipboard } from '@/helpers/CopyItem';
-import { switchToArbitrumSepolia, getBalance } from '../../lib/web3/etherutiles';
+import { getBalance } from '../../lib/web3/etherutiles';
 import { useWallet } from "@/context/WalletProvider";
 import toast from "react-hot-toast";
+import { useRouter } from "next/navigation";
 
 const addressTrimmer = (add: string | null) => {
   if (add === null) return null;
@@ -25,6 +26,7 @@ const addressTrimmer = (add: string | null) => {
 }
 
 const WalletInterface: React.FC = () => {
+  const router = useRouter();
   const { address, disconnect } = useWallet();
   const [trimmedWalletAddress, setTrimmedWalletAddress] = useState<string | null>(null);
   const [walletBalance, setWalletBalance] = useState('loading');
@@ -47,8 +49,10 @@ const WalletInterface: React.FC = () => {
 
   const handleDisconnect = () => {
     disconnect();
+    router.replace('/');
     if (address === null) toast.error('Could not log out!');
     else toast.success('Successfully logged out!');
+    
   };
 
   return (

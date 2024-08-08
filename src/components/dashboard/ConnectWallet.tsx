@@ -51,9 +51,9 @@ const ConnectMetamask: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           Click the button below to connect your Metamask wallet and access your account.
         </p>
         <button
-        onClick={()=>{
+        onClick={
           handleConnect
-        }}
+        }
           className="w-full bg-gradient-to-r from-orange-400 to-orange-500 hover:from-orange-500 hover:to-orange-600 text-white font-bold py-4 px-6 rounded-lg transition duration-300 ease-in-out transform hover:scale-105 shadow-lg"
         >
           Connect Metamask
