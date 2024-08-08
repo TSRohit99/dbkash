@@ -1,7 +1,7 @@
 "use client"
 
 import Link from 'next/link'
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { FaBars, FaTimes } from 'react-icons/fa'
 import QuickOverviewModal from './QuickOverviewModal'
 import ConnectMetamask from '../dashboard/ConnectWallet'
@@ -14,7 +14,7 @@ const navItems = [
 
 ]
 
-export default function Navbar() {
+const Navbar : React.FC =()=> {
   const [isOpen, setIsOpen] = useState(false)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false)
@@ -118,3 +118,5 @@ export default function Navbar() {
     </nav>
   )
 } 
+
+export default Navbar;

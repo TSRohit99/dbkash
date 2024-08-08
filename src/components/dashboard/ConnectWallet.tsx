@@ -16,6 +16,7 @@ const ConnectMetamask: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const router = useRouter();
 
   const handleConnect = async () => {
+   
     const res : ConnectResponse | undefined = await connect();
     
     if (res?.success) {

@@ -1,4 +1,6 @@
-function Statistics() {
+import React from "react";
+
+const Statistics : React.FC = ()=> {
   return (
     <section className="text-center py-16">
       <div className="container px-5">

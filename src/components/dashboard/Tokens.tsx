@@ -1,4 +1,6 @@
-export default function TokensList() {
+import React from "react";
+
+const TokensList :  React.FC = () => {
   const tokensList = [
     { name: "Bangladeshi Digital Taka", ticker: "BDT", value: 10000 },
     { name: "United States Dollars", ticker: "USD", value: 100 },
@@ -38,3 +40,5 @@ export default function TokensList() {
     </div>
   );
 }
+
+export default TokensList;

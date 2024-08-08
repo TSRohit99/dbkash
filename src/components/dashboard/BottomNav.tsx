@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import { FiHome, FiCamera, FiList } from "react-icons/fi";
 import QRScanner from "./ScanQR";
 
-const BottomNav = () => {
+const BottomNav : React.FC = () => {
   const [active, setActive] = useState("Home");
   const [isQRScanModalOpen, seIsQRScanModalOpen] = useState(false);
 

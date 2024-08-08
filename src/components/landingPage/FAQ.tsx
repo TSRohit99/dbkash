@@ -4,8 +4,9 @@ import {
     AccordionItem,
     AccordionTrigger,
   } from "@/components/ui/accordion";
+  import React from "react";
   
-  const FAQ = () => {
+  const FAQ : React.FC = () => {
     const faqs = [
       {
         q: "Is it decentralized",

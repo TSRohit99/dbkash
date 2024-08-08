@@ -1,5 +1,5 @@
-
-export default function About() {
+import React from "react";
+const About : React.FC = () => {
   return (
     <div id="about">
        <section className="container mx-auto px-4 py-16">
@@ -25,3 +25,5 @@ export default function About() {
     </div>
   )
 }
+
+export default About;

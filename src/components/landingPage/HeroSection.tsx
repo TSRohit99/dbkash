@@ -1,6 +1,6 @@
 import Link from "next/link"
-
-export default function HeroSection() {
+import React from "react";
+const HeroSection : React.FC= ()=> {
     return (
       <div>
         <section className="container mx-auto px-4 pt-28 md:pt-24 pb-16 text-center max-w-full ">
@@ -21,3 +21,4 @@ export default function HeroSection() {
     )
   }
   
+  export default HeroSection;

@@ -5,7 +5,7 @@ import { LuUtilityPole } from "react-icons/lu";
 
 
 
-const FeatureButtons = () => {
+const FeatureButtons: React.FC = () => {
   const features = [
     { icon: <FaMoneyBillTrendUp />, label: "Stake", color: "bg-green-500", hover: "hover:bg-green-600" },
     { icon: <FaRegAddressBook />, label: "Add contact", color: "bg-purple-500", hover: "hover:bg-purple-600" },

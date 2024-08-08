@@ -19,7 +19,7 @@ const announcements = [
   // ... add more announcements as needed
 ];
 
-const Announcements = () => {
+const Announcements : React.FC = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isPlaying, setIsPlaying] = useState(true);
 
