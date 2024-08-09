@@ -11,6 +11,10 @@ import { useEffect, useState } from "react";
 export default function Dashboard() {
   const { address } = useWallet();
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
+  const [scannedAddress, setScannedAddress] = useState('');
+  const handleAddressScanned = (address: string) => {
+    setScannedAddress(address);
+  };
 
   useEffect(() => {
     if (address === null || address === undefined) {
@@ -22,11 +26,11 @@ export default function Dashboard() {
     <>
       {!isWalletModalOpen ? (
         <div className="px-2 mt-3">
-          <WalletInterface />
+          <WalletInterface scannedAddress={scannedAddress}/>
           <TokensList />
           <FeatureButtons />
           <div className="p-10"></div>
-          <BottomNav />
+          <BottomNav handleAddressScanned={handleAddressScanned}/>
         </div>
       ) : (
         <ConnectMetamask

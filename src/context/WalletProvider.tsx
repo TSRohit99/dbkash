@@ -2,11 +2,11 @@
 
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
 import { connectWallet, switchToArbitrumSepolia } from '../lib/web3/etherutiles';
-import { ConnectResponse } from '@/types/ConnectResponse';
+import { UtilFuncsResponse } from '@/types/UtilFuncsResponse';
 
 interface WalletContextType {
   address: string | null;
-  connect: () => Promise<ConnectResponse | undefined>;
+  connect: () => Promise<UtilFuncsResponse | undefined>;
   disconnect: () => void;
 }
 
@@ -22,7 +22,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   });
 
   const connect = useCallback(async () => {
-    const response: ConnectResponse = await connectWallet();
+    const response: UtilFuncsResponse = await connectWallet();
     if (response.success && response.address) {
       setAddress(response.address);
       localStorage.setItem('walletAddress', response.address); // Save address to localStorage

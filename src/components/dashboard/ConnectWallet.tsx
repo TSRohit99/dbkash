@@ -5,7 +5,7 @@ import toast from 'react-hot-toast';
 import { FiX } from 'react-icons/fi';
 import { ModalProps } from '@/types/ModalProps';
 import { useWallet } from '../../context/WalletProvider';
-import {ConnectResponse} from '../../types/ConnectResponse'
+import {UtilFuncsResponse} from '../../types/UtilFuncsResponse'
 import { useRouter } from 'next/navigation';
 
 
@@ -17,7 +17,7 @@ const ConnectMetamask: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
   const handleConnect = async () => {
    
-    const res : ConnectResponse | undefined = await connect();
+    const res : UtilFuncsResponse | undefined = await connect();
     
     if (res?.success) {
       router.replace('/dashboard');

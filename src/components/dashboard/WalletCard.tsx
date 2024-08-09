@@ -17,19 +17,24 @@ import { useWallet } from "@/context/WalletProvider";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton"
+import SendMoneyComponent from "./SendMoney";
+import { WalletCardProps } from "@/types/WalletCardProps";
 
 
 const addressTrimmer = (address: string | null) => {
   return address ? (`${address.slice(0, 4)}...${address.slice(-3)}`).toLowerCase() : null;
 }
 
-const WalletInterface: React.FC = () => {
+
+const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
   const router = useRouter();
   const { address, disconnect } = useWallet();
   const [trimmedWalletAddress, setTrimmedWalletAddress] = useState<string | null>(null);
   const [walletBalance, setWalletBalance] = useState<string | null>(null);
   const [userName, setUserName] = useState<String | null>(null);
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
+  const [isSMModalOpen, setIsSMModalOpen] = useState(false);
+
 
   useEffect(() => {
     if (address) {
@@ -39,12 +44,20 @@ const WalletInterface: React.FC = () => {
     }
   }, [address]);
 
+  useEffect(() => {
+    if (scannedAddress) {
+      setIsQrModalOpen(false);
+      setIsSMModalOpen(true);
+    }
+  }, [scannedAddress]);
+
   const fetchBalance = async () => {
     if (address) {
       const balanceValue: any = await getBalance(address);
-      setWalletBalance(balanceValue);
+      setWalletBalance(parseFloat(balanceValue).toFixed(6));
     }
   };
+
 
   const handleDisconnect = () => {
     disconnect();
@@ -100,6 +113,9 @@ const WalletInterface: React.FC = () => {
           </button>
 
           <button
+          onClick={()=>{
+            setIsSMModalOpen(true);
+          }}
             className="bg-white hover:bg-blue-100 transition duration-300 hover:p-2 w-1/4 text-blue-500 rounded-lg p-3 flex flex-col items-center"
           >
             <FiArrowUp />
@@ -116,6 +132,11 @@ const WalletInterface: React.FC = () => {
       </div>
 
       <WalletQR address={address} isOpen={isQrModalOpen} onClose={() => setIsQrModalOpen(false)} />
+      <SendMoneyComponent 
+        isOpen={isSMModalOpen} 
+        onClose={()=>setIsSMModalOpen(false)} 
+        scannedAddress={scannedAddress}
+        />
     </>
   );
 };

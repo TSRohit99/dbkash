@@ -7,11 +7,14 @@ import { FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { ModalProps } from '@/types/ModalProps';
 
+interface QRScannerProps extends ModalProps {
+  handleAddressScanned?: (address: string) => void;
+}
 
-const QRScanner: React.FC<ModalProps> = ({ isOpen, onClose }) => {
+const QRScanner: React.FC<QRScannerProps> = ({ isOpen, onClose, handleAddressScanned  }) => {
   // const router = useRouter()
   const [error, setError] = useState<string | null>(null);
-  const [address, setAddress] = useState<string | null>(null);
+  // const [address, setAddress] = useState<string | null>(null);
   const [html5QrCode, setHtml5QrCode] = useState<Html5Qrcode | null>(null);
 
   useEffect(() => {
@@ -53,11 +56,9 @@ const QRScanner: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
   const handleScan = (decodedText: string) => {
     if (/^0x[a-fA-F0-9]{40}$/.test(decodedText)) {
-      setAddress(decodedText);
-      alert(decodedText);
-      stopScan();
+      if(handleAddressScanned) handleAddressScanned(decodedText);
       onClose();
-
+      stopScan();
     } else {
       setError("Invalid Ethereum address format");
       toast.error("Invalid Ethereum address format");
@@ -86,6 +87,11 @@ const QRScanner: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         <p className="text-gray-600 text-center mt-4 text-sm">
           Position the QR code within the frame to scan.
         </p>
+        {error && (
+          <p className="mt-2 text-sm text-red-600">
+            {error}
+          </p>
+        )}
       </div>
     </div>
   ) : null;

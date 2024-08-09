@@ -1,4 +1,4 @@
-import { ConnectResponse } from '@/types/ConnectResponse';
+import { UtilFuncsResponse } from '@/types/UtilFuncsResponse';
 import { ethers } from 'ethers';
 
 
@@ -27,7 +27,7 @@ export const getCurrentNetwork = async (): Promise<string | null> => {
   }
 };
 
-export const connectWallet = async (): Promise<ConnectResponse> => {
+export const connectWallet = async (): Promise<UtilFuncsResponse> => {
   if (typeof window !== 'undefined' && window.ethereum?.request) {
     try {
       const currentNetwork = await getCurrentNetwork(); // Fetch current network
@@ -52,7 +52,7 @@ export const connectWallet = async (): Promise<ConnectResponse> => {
       return { success: true, address };
     } catch (error) {
       console.error('Failed to connect wallet:', error);
-      return { success: false, error: 'Failed to connect wallet, check your metamask' };
+      return { success: false, error: 'Failed to connect wallet, check your metamask and approve!' };
     }
   } else {
     return { success: false, error: 'MetaMask not detected' };
@@ -60,7 +60,7 @@ export const connectWallet = async (): Promise<ConnectResponse> => {
 };
 
 
-export const switchToArbitrumSepolia = async (): Promise<ConnectResponse> => {
+export const switchToArbitrumSepolia = async (): Promise<UtilFuncsResponse> => {
   const chainId = '0x66eee'; // Chain ID for Arbitrum Sepolia
   if (typeof window !== 'undefined' && window.ethereum?.request) {
     try {
@@ -95,7 +95,7 @@ export const switchToArbitrumSepolia = async (): Promise<ConnectResponse> => {
         }
       }
       console.error('Failed to switch to Arbitrum Sepolia:', error);
-      return { success: false, error: 'Failed to switch network. Add the following RPC https://chainlist.org/chain/421614' };
+      return { success: false, error: 'Failed to switch network. Add the following RPC https://chainlist.org/chain/421614.' };
     }
   } else {
     return { success: false, error: 'MetaMask not detected' };
@@ -110,5 +110,48 @@ export const getBalance = async (address: string): Promise<string | null> => {
   } catch (error) {
     console.error('Failed to get balance:', error);
     return null;
+  }
+};
+
+export const fetchGasPrice = async (): Promise<any> => {
+  const provider = getProvider();
+  const price = await provider.getGasPrice();
+  return ethers.utils.formatUnits(price, 'gwei');
+};
+
+export const sendMoney = async (toAddress: string, amount: string): Promise<UtilFuncsResponse> => {
+  if (typeof window !== 'undefined' && window.ethereum) {
+    try {
+      const provider = getProvider();
+      const signer = provider.getSigner();
+      
+      // Convert the amount from ETH to Wei
+      const amountWei = ethers.utils.parseEther(amount);
+      
+      // Create the transaction object
+      const tx = {
+        to: toAddress,
+        value: amountWei
+      };
+      
+      // Send the transaction
+      const transaction = await signer.sendTransaction(tx);
+      
+      // Wait for the transaction to be mined
+      await transaction.wait();
+      
+      return { 
+        success: true, 
+        txnHash: transaction.hash 
+      };
+    } catch (error) {
+      console.error('Failed to send money:', error);
+      return { 
+        success: false, 
+        error: 'Failed to send money. Please check your balance and try again.' 
+      };
+    }
+  } else {
+    return { success: false, error: 'MetaMask not detected' };
   }
 };

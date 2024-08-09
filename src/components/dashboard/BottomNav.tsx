@@ -3,10 +3,15 @@
 import React, { useState } from "react";
 import { FiHome, FiCamera, FiList } from "react-icons/fi";
 import QRScanner from "./ScanQR";
+import { BottomNavProps } from "@/types/BottomNavProps";
 
-const BottomNav : React.FC = () => {
+const BottomNav : React.FC<BottomNavProps> = ({handleAddressScanned}) => {
   const [active, setActive] = useState("Home");
   const [isQRScanModalOpen, seIsQRScanModalOpen] = useState(false);
+
+  const onScanned = (address: string) => {
+    handleAddressScanned(address);
+  };
 
   const navItems = [
     { icon: <FiHome />, label: "Home" },
@@ -37,7 +42,7 @@ const BottomNav : React.FC = () => {
       ))}
 
     </div>
-    <QRScanner isOpen={isQRScanModalOpen} onClose={()=>seIsQRScanModalOpen(false)}/>
+    <QRScanner isOpen={isQRScanModalOpen}onClose={()=>seIsQRScanModalOpen(false)} handleAddressScanned={onScanned} />
     </>
   );
 };
