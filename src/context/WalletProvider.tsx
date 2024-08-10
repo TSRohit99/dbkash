@@ -25,7 +25,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const response: UtilFuncsResponse = await connectWallet();
     if (response.success && response.address) {
       setAddress(response.address);
-      localStorage.setItem('walletAddress', response.address); // Save address to localStorage
+      sessionStorage.setItem('walletAddress', response.address); // Save address to localStorage
     } else {
       console.error(response.error);
     }
@@ -34,7 +34,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const disconnect = useCallback(() => {
     setAddress(null);
-    localStorage.removeItem('walletAddress'); // Remove address from localStorage
+    sessionStorage.removeItem('walletAddress'); // Remove address from localStorage
     // Add MetaMask disconnect logic here if applicable
   }, []);
 
