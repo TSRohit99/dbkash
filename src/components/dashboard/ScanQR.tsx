@@ -23,11 +23,11 @@ const QRScanner: React.FC<QRScannerProps> = ({ isOpen, onClose, handleAddressSca
     }
   };
 
-  const handleError = (error: Error) => {
-    console.error("QR Code Scan Error", error);
-    setError("Error scanning QR code");
-    toast.error("Error scanning QR code");
-  };
+  // const handleError = (error: Error) => {
+  //   console.error("QR Code Scan Error", error);
+  //   setError("Error scanning QR code");
+  //   toast.error("Error scanning QR code");
+  // };
 
   if (!isOpen) return null;
 
@@ -35,7 +35,10 @@ const QRScanner: React.FC<QRScannerProps> = ({ isOpen, onClose, handleAddressSca
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex justify-center items-center p-4">
     <div className="bg-white bg-opacity-90 rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
       <button
-        onClick={onClose}
+        onClick={()=>{
+          onClose();
+          window.location.reload();
+        }}
         className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition duration-300"
       >
         <FiX size={24} />
@@ -53,11 +56,11 @@ const QRScanner: React.FC<QRScannerProps> = ({ isOpen, onClose, handleAddressSca
       <p className="text-gray-600 text-center mt-4 text-sm">
         Position the QR code within the frame to scan.
       </p>
-      {error && (
+      {/* {error && (
         <p className="mt-2 text-sm text-red-600">
           {error}
         </p>
-      )}
+      )} */}
     </div>
   </div>
   
