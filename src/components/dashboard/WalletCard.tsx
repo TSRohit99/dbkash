@@ -19,7 +19,8 @@ import { useRouter } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton"
 import SendMoneyComponent from "./SendMoney";
 import { WalletCardProps } from "@/types/WalletCardProps";
-
+import SettingsModal from "./Settings";
+import axios from "axios";
 
 const addressTrimmer = (address: string | null) => {
   return address ? (`${address.slice(0, 4)}...${address.slice(-3)}`).toLowerCase() : null;
@@ -31,15 +32,18 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
   const { address, disconnect } = useWallet();
   const [trimmedWalletAddress, setTrimmedWalletAddress] = useState<string | null>(null);
   const [walletBalance, setWalletBalance] = useState<string | null>(null);
-  const [userName, setUserName] = useState<String | null>(null);
+  const [userName, setUserName] = useState<string>('Anon');
+  const [userEmail, setUserEmail] = useState<string>('');
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [isSMModalOpen, setIsSMModalOpen] = useState(false);
+  const [isSTModalOpen, setIsSTModalOpenn] = useState(false);
+
 
 
   useEffect(() => {
     if (address) {
-      setUserName("Anon Dude")
       setTrimmedWalletAddress(addressTrimmer(address));
+      getInfo();
       fetchBalance();
     }
   }, [address]);
@@ -50,6 +54,22 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
       setIsSMModalOpen(true);
     }
   }, [scannedAddress]);
+
+  const getInfo = async () => {
+    try {
+      const response = await axios.get('/api/v1/user', { params: { address } });
+      if(await response.data.success){
+      const data = await response.data.data;
+      setUserName(await data.username);
+      const emailValue = await data.email || '';
+      setUserEmail(emailValue);
+      }else{
+        console.error('Couldnt get info!')
+      }
+    } catch (err) {
+      console.error('Error fetching userInfo:', err);
+    }
+  };
 
   const fetchBalance = async () => {
     if (address) {
@@ -67,6 +87,10 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
     
   };
 
+  const handleSettings = ()=> {
+    setIsSTModalOpenn(true)
+  }
+
   return (
     <>
       <div className="font-sans mx-auto bg-gradient-to-bl from-blue-500 to-customBlue rounded-3xl p-6 text-white m-0 box-border">
@@ -77,7 +101,7 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
             </h2>
           </Link>
           <div>
-            <button>
+            <button onClick={handleSettings}>
               <FiSettings className="inline-block mr-3 text-xl" />
             </button>
             <button onClick={handleDisconnect}>
@@ -88,7 +112,7 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
 
         <div className="text-lg font-bold mb-2">{userName ||(
                 <Skeleton className="h-5 w-[80px] bg-white" />
-              )}</div>
+              )}</div> 
         <div className="text-4xl font-bold mb-2  flex flex-row">{walletBalance||(
                 <Skeleton className="h-7 w-[58px] mt-2 bg-white" />
               )} ETH</div>
@@ -132,6 +156,12 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
       </div>
 
       <WalletQR address={address} isOpen={isQrModalOpen} onClose={() => setIsQrModalOpen(false)} />
+      <SettingsModal isOpen={isSTModalOpen} 
+      onClose={() => setIsSTModalOpenn(false)}
+      username={userName}
+      setUsername={setUserName}
+      userEmail ={userEmail}
+       />
       <SendMoneyComponent 
         isOpen={isSMModalOpen} 
         onClose={()=>setIsSMModalOpen(false)} 

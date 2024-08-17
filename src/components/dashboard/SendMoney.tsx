@@ -6,6 +6,10 @@ import { FiX } from 'react-icons/fi';
 import toast from 'react-hot-toast';
 import { WalletCardProps } from '@/types/WalletCardProps';
 import { useRouter } from 'next/navigation';
+import { useWallet } from '@/context/WalletProvider';
+import axios from 'axios';
+
+
 
 const addressBook = [
   { name: 'Alice', address: '0x1234567890123456789012345678901234567890' },
@@ -18,40 +22,63 @@ const trimAddress = (address: string) => {
 };
 
 interface SendMoneyProps extends WalletCardProps, ModalProps {
+}
+
+type addressBookType = {
+  name: string,
+  address: string,
 
 }
 
 const SendMoneyComponent: React.FC<SendMoneyProps> = ({ isOpen, onClose,scannedAddress }) => {
   if(!isOpen) return null;
+  const { address } = useWallet();
+  const [addressBook, setAddressBook] = useState<Array<addressBookType>>([]);
   const router = useRouter();
   const [recipient, setRecipient] = useState(scannedAddress);
   const [amount, setAmount] = useState('');
-  const [searchResults, setSearchResults] = useState<Array<{ name: string; address: string }>>([]);
+  const [searchResults, setSearchResults] = useState<Array<addressBookType>>([]);
   const [selectedAddress, setSelectedAddress] = useState('');
   const [gasPrice, setGasPrice] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   useEffect(() => {
-    if (isOpen) { 
-
+    if (isOpen) {
       if (scannedAddress) {
         setRecipient(scannedAddress);
         setSelectedAddress(scannedAddress);
       }
-      // Fetch gas price
-      const getGasPrice = async () => {
-        try {
-          const price = await fetchGasPrice();
-          setGasPrice(price);
-        } catch (error) {
-          console.error('Error fetching gas price:', error);
-          setGasPrice(null);
-        }
-      };
-  
-      getGasPrice();
+
+      Promise.all([
+        getAddressBook(),
+        getGasPrice()
+      ]).catch(err => {
+        console.error('Error initializing component:', err);
+      })
     }
-  }, [isOpen,scannedAddress]);
+  }, [isOpen, scannedAddress, address]);
+
+  const getAddressBook = async () => {
+    try {
+      const res = await axios.get('/api/v1/user', { params: { address } });
+      const data = res.data.data?.addressBook || [];
+      setAddressBook(data);
+    } catch (err) {
+      console.error('Error fetching address book:', err);
+      setAddressBook([]);
+    }
+  };
+
+  const getGasPrice = async () => {
+    try {
+      const price = await fetchGasPrice();
+      setGasPrice(price);
+    } catch (err) {
+      console.error('Error fetching gas price:', err);
+      setGasPrice(null);
+    }
+  };
+
 
   const handleRecipientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
