@@ -32,7 +32,7 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
   const { address, disconnect } = useWallet();
   const [trimmedWalletAddress, setTrimmedWalletAddress] = useState<string | null>(null);
   const [walletBalance, setWalletBalance] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string>('Anon');
+  const [userName, setUserName] = useState<string>('');
   const [userEmail, setUserEmail] = useState<string>('');
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [isSMModalOpen, setIsSMModalOpen] = useState(false);
@@ -161,6 +161,7 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
       username={userName}
       setUsername={setUserName}
       userEmail ={userEmail}
+      setUserEmail ={setUserEmail}
        />
       <SendMoneyComponent 
         isOpen={isSMModalOpen} 

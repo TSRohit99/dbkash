@@ -1,6 +1,6 @@
 import dbConnect from "@/lib/db/dbConnect";
 import userModel from "@/app/models/user";
-import { ApiResponse } from "@/types/ApiResponse";
+import { createResponse } from "@/helpers/CreateResponse";
 
 
 export async function GET(request: Request): Promise<Response> {
@@ -41,11 +41,4 @@ export async function GET(request: Request): Promise<Response> {
             message: "Internal server error"
         }, 500);
     }
-}
-
-function createResponse(responseData: ApiResponse, status: number): Response {
-    return new Response(JSON.stringify(responseData), {
-        status: status,
-        headers: { 'Content-Type': 'application/json' }
-    });
 }
