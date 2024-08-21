@@ -46,7 +46,7 @@ export const connectWallet = async (): Promise<UtilFuncsResponse> => {
       await window.ethereum.request({ method: 'eth_requestAccounts' });
       const provider = getProvider();
       const signer = provider.getSigner();
-      const address = await signer.getAddress();
+      const address = (await signer.getAddress()).toLowerCase();
       const msg = "Hello Anon! Welcoming you to dBKash.";
       const signature = await signer.signMessage(msg);
       await checkIfTheyNew(address);

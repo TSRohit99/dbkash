@@ -21,6 +21,7 @@ import SendMoneyComponent from "./SendMoney";
 import { WalletCardProps } from "@/types/WalletCardProps";
 import SettingsModal from "./Settings";
 import axios from "axios";
+import { checkIfTheyNew } from "@/lib/db/checkIfTheyNew";
 
 const addressTrimmer = (address: string | null) => {
   return address ? (`${address.slice(0, 4)}...${address.slice(-3)}`).toLowerCase() : null;
@@ -66,7 +67,20 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
       }else{
         console.error('Couldnt get info!')
       }
-    } catch (err) {
+    } catch (err : any) {
+      if(!await err.response.data.success){
+        console.log("Checking if its a new user wallet....")
+        if(address){
+        try {
+          await checkIfTheyNew(address);
+        } catch (error) {
+          console.error("Error creating new account while accountChanged :", error)
+        } finally{
+         window.location.reload();
+        }
+      }
+      }
+    
       console.error('Error fetching userInfo:', err);
     }
   };

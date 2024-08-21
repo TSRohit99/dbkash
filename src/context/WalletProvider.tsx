@@ -1,7 +1,7 @@
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
-import { connectWallet, switchToArbitrumSepolia } from '../lib/web3/etherutiles';
+import { connectWallet } from '../lib/web3/etherutiles';
 import { UtilFuncsResponse } from '@/types/UtilFuncsResponse';
 
 interface WalletContextType {
@@ -14,9 +14,8 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [address, setAddress] = useState<string | null>(() => {
-    // Retrieve address from localStorage if it exists
     if (typeof window !== "undefined") {
-      return localStorage.getItem('walletAddress');
+      return sessionStorage.getItem('walletAddress');
     }
     return null;
   });
@@ -24,8 +23,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const connect = useCallback(async () => {
     const response: UtilFuncsResponse = await connectWallet();
     if (response.success && response.address) {
-      setAddress(response.address);
-      sessionStorage.setItem('walletAddress', response.address); // Save address to localStorage
+       const newAddress = response.address.toLowerCase();
+      setAddress(newAddress);
+      sessionStorage.setItem('walletAddress', newAddress);
     } else {
       console.error(response.error);
     }
@@ -34,10 +34,23 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const disconnect = useCallback(() => {
     setAddress(null);
-    sessionStorage.removeItem('walletAddress'); // Remove address from localStorage
-    // Add MetaMask disconnect logic here if applicable
+    sessionStorage.removeItem('walletAddress');
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.ethereum) {
+      // Listener for account changes
+      window.ethereum.on('accountsChanged', (accounts: string[]) => {
+        if (accounts.length > 0) {
+          const newAddress = accounts[0].toLowerCase();
+          setAddress(newAddress);
+          sessionStorage.setItem('walletAddress', newAddress);
+        } else {
+          disconnect(); // Handle when the user disconnects their wallet
+        }
+      });
+    }
+  }, [disconnect]);
 
   return (
     <WalletContext.Provider

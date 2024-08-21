@@ -18,9 +18,8 @@ export async function POST(request: Request): Promise<Response> {
         console.log("Connected to database, attempting to create data...");
         
         const newUser = await userModel.create({ address });
-
         console.log("User after create:", newUser);
-        
+      
         return createResponse({
             success: true,
             data: newUser
