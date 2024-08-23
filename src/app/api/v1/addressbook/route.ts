@@ -1,10 +1,13 @@
 import dbConnect from "@/lib/db/dbConnect";
 import userModel from "@/app/models/user";
 import { createResponse } from "@/helpers/CreateResponse";
+import { headers } from "next/headers";
 
 export async function POST(request: Request): Promise<Response> {
     const req = await request.json();
-    const { userAddress, name, address } = req;
+    const {name, address } = req;
+
+    const userAddress = headers().get("x-user-address");
 
     await dbConnect();
 

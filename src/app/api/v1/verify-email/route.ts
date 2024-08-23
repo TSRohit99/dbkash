@@ -4,10 +4,12 @@ import dbConnect from "@/lib/db/dbConnect";
 import userModel from "@/app/models/user";
 import { createResponse } from "@/helpers/CreateResponse";
 import bcrypt from 'bcrypt'
+import { headers } from "next/headers";
 
 export async function POST(request: Request): Promise<Response> {
     const req = await request.json();
-    const { address, verificationCode } = req;
+    const {verificationCode } = req;
+    const address = headers().get("x-user-address");
     
     await dbConnect();
     

@@ -3,6 +3,7 @@
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
 import { connectWallet } from '../lib/web3/etherutiles';
 import { UtilFuncsResponse } from '@/types/UtilFuncsResponse';
+import { flushCookie } from '@/helpers/flushCookie';
 
 interface WalletContextType {
   address: string | null;
@@ -23,7 +24,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const connect = useCallback(async () => {
     const response: UtilFuncsResponse = await connectWallet();
     if (response.success && response.address) {
-       const newAddress = response.address.toLowerCase();
+      const newAddress = response.address.toLowerCase();
       setAddress(newAddress);
       sessionStorage.setItem('walletAddress', newAddress);
     } else {
@@ -35,6 +36,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const disconnect = useCallback(() => {
     setAddress(null);
     sessionStorage.removeItem('walletAddress');
+    flushCookie();
   }, []);
 
   useEffect(() => {
@@ -42,6 +44,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       // Listener for account changes
       window.ethereum.on('accountsChanged', (accounts: string[]) => {
         if (accounts.length > 0) {
+          flushCookie();
+          sessionStorage.removeItem('walletAddress');
           const newAddress = accounts[0].toLowerCase();
           setAddress(newAddress);
           sessionStorage.setItem('walletAddress', newAddress);

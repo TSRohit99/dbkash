@@ -36,16 +36,16 @@ const userSchema: Schema = new mongoose.Schema({
     pendingEmail: {
         type: String,
         required: false,
-        default: '',
+        default: null,
     },
     verificationCode: {
         type: String,
         required: false,
-        default: '',
+        default: null,
     },
     verificationCodeExpires: {
         type: Date,
-        default: Date.now() + 3600000,
+        default: null,
     },
 
 });

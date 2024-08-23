@@ -1,6 +1,7 @@
 import { UtilFuncsResponse } from '@/types/UtilFuncsResponse';
 import { ethers } from 'ethers';
-import { checkIfTheyNew } from '../db/checkIfTheyNew';
+import { checkIfTheyNew } from '../../middlewares/checkIfTheyNew';
+import { authVerifier } from '../../middlewares/authVerifier';
 
 
 
@@ -49,8 +50,9 @@ export const connectWallet = async (): Promise<UtilFuncsResponse> => {
       const address = (await signer.getAddress()).toLowerCase();
       const msg = "Hello Anon! Welcoming you to dBKash.";
       const signature = await signer.signMessage(msg);
-      await checkIfTheyNew(address);
-      return { success: true, address };
+      const token = await authVerifier(signature, address);
+      await checkIfTheyNew();
+      return { success: true, token, address };
     } catch (error) {
       console.error('Failed to connect wallet:', error);
       return { success: false, error: 'Failed to connect wallet, check your metamask and approve!' };

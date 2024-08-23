@@ -58,7 +58,6 @@ const SettingsModal: React.FC<SettingsProps> = ({
     try {
       const response = await axios.post("/api/v1/trigger-resend", {
         name,
-        address,
         email,
       });
 
@@ -92,7 +91,6 @@ const SettingsModal: React.FC<SettingsProps> = ({
 
     try {
       const response = await axios.post("/api/v1/verify-email", {
-        address,
         verificationCode,
       });
 
@@ -116,7 +114,6 @@ const SettingsModal: React.FC<SettingsProps> = ({
     setUsername(name);
     try {
       const response = await axios.post("/api/v1/info-update", {
-        address,
         name,
         email,
       });

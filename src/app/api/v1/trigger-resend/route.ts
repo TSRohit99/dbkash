@@ -3,10 +3,12 @@ import userModel from "@/app/models/user";
 import { createResponse } from "@/helpers/CreateResponse";
 import { sendVerificationEmail } from "@/helpers/sendVerificationEMail";
 import bcrypt from 'bcrypt'
+import { headers } from "next/headers";
 
 export async function POST(request: Request): Promise<Response> {
     const req = await request.json();
-    const { address, email, name } = req;
+    const {email, name } = req;
+    const address = headers().get("x-user-address");
     await dbConnect();
     if (await userModel.findOne({email})) {
         return createResponse({
@@ -30,7 +32,7 @@ export async function POST(request: Request): Promise<Response> {
 
         // Store the hashed code and email temporarily
         await userModel.findOneAndUpdate(
-            { address: address },
+            { address },
             {
                 $set: {
                     pendingEmail: email,

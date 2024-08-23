@@ -60,7 +60,7 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({ isOpen, onClose,scannedA
 
   const getAddressBook = async () => {
     try {
-      const res = await axios.get('/api/v1/user', { params: { address } });
+      const res = await axios.get('/api/v1/user');
       const data = res.data.data?.addressBook || [];
       setAddressBook(data);
     } catch (err) {

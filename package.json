@@ -21,6 +21,7 @@
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",
     "ethers": "^5.7.1",
+    "jose": "^5.7.0",
     "jsonwebtoken": "^9.0.2",
     "mongodb": "^6.8.0",
     "mongoose": "^8.5.3",

@@ -30,7 +30,7 @@ const AddressBookComponent: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const fetchAddressBook = async () => {
     setIsLoading(true);
     try {
-      const response = await axios.get('/api/v1/user', { params: { address: userAddress } });
+      const response = await axios.get('/api/v1/user');
       setAddressBook(response.data.data.addressBook || []);
     } catch (err) {
             
@@ -72,7 +72,6 @@ const AddressBookComponent: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
     try {
       const response = await axios.post('/api/v1/addressbook', {
-        userAddress,
         name: newName.trim(),
         address: newAddress.trim(),
       });
