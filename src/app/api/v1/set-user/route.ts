@@ -1,10 +1,9 @@
 import dbConnect from "@/lib/db/dbConnect";
 import userModel from "@/app/models/user";
 import { createResponse } from "@/helpers/CreateResponse";
-import { NextApiRequest } from "next";
 import { headers } from 'next/headers'
 
-export async function POST(request: NextApiRequest): Promise<Response> {
+export async function POST(): Promise<Response> {
     const address = headers().get("x-user-address");
     
     if (!address) {

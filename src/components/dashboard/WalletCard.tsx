@@ -72,7 +72,7 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
         console.log("Checking if its a new user wallet....")
         if(address){
         try {
-          await checkIfTheyNew(address);
+          await checkIfTheyNew();
         } catch (error) {
           console.error("Error creating new account while accountChanged :", error)
         } finally{
