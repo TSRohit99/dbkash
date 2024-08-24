@@ -1,7 +1,7 @@
 import { UtilFuncsResponse } from '@/types/UtilFuncsResponse';
 import { ethers } from 'ethers';
-import { checkIfTheyNew } from '../../middlewares/checkIfTheyNew';
-import { authVerifier } from '../../middlewares/authVerifier';
+import { checkIfTheyNew } from '../checkIfTheyNew';
+import { authVerifier } from '../authVerifier';
 
 
 
@@ -118,8 +118,24 @@ export const getBalance = async (address: string): Promise<string | null> => {
 
 export const fetchGasPrice = async (): Promise<any> => {
   const provider = getProvider();
-  const price = await provider.getGasPrice();
-  return ethers.utils.formatUnits(price, 'gwei');
+  const gasPrice = await provider.getGasPrice();
+
+  // Convert gas price from wei to gwei
+  const gasPriceGwei = ethers.utils.formatUnits(gasPrice, 'gwei');
+
+  // Estimate gas for a standard transaction (21000 gas)
+  const standardGasLimit = ethers.BigNumber.from(21000);
+
+  // Calculate estimated gas fee in wei
+  const estimatedGasFeeWei = gasPrice.mul(standardGasLimit);
+
+  // Convert estimated gas fee from wei to ether for a more readable format
+  const estimatedGasFeeEther = ethers.utils.formatUnits(estimatedGasFeeWei, 'ether');
+
+  return {
+    gasPriceGwei,
+    estimatedGasFee: estimatedGasFeeEther
+  };
 };
 
 export const sendMoney = async (toAddress: string, amount: string): Promise<UtilFuncsResponse> => {

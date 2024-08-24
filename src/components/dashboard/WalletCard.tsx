@@ -21,7 +21,7 @@ import SendMoneyComponent from "./SendMoney";
 import { WalletCardProps } from "@/types/WalletCardProps";
 import SettingsModal from "./Settings";
 import axios from "axios";
-import { checkIfTheyNew } from "@/middlewares/checkIfTheyNew";
+import { checkIfTheyNew } from "@/lib/checkIfTheyNew";
 
 const addressTrimmer = (address: string | null) => {
   return address ? (`${address.slice(0, 4)}...${address.slice(-3)}`).toLowerCase() : null;
@@ -60,7 +60,7 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
     try {
       const response = await axios.get('/api/v1/user');
       if(await response.data.success){
-      const data = await response.data.data;
+      const data = await response.data.data ;
       setUserName(await data.username);
       const emailValue = await data.email || '';
       setUserEmail(emailValue);

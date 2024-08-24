@@ -6,7 +6,6 @@ export async function authVerifier(signature:string, address:string) : Promise<s
             signature,
             address
         });
-        console.log('auth',res)
 
         if(res.data.success){
             console.log(res.data.message || "Auth success!");
@@ -14,11 +13,10 @@ export async function authVerifier(signature:string, address:string) : Promise<s
             return token;
         }else{
             console.log(res.data.message || "Auth failed!");
-            console.log(res);
             throw new Error('Error on authController ');
         }
     } catch (error) {
-        console.log("Error on authController : ", error);
+        console.error("Error on authController : ", error);
         throw error;
     }
 }

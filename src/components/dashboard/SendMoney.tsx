@@ -10,13 +10,6 @@ import { useWallet } from '@/context/WalletProvider';
 import axios from 'axios';
 
 
-
-const addressBook = [
-  { name: 'Alice', address: '0x1234567890123456789012345678901234567890' },
-  { name: 'Bob', address: '0x0987654321098765432109876543210987654321' },
-  { name: 'rohit', address: '0x6fc7161d0fBd39d4EfAab75F1e60B7692Df22215' },
-];
-
 const trimAddress = (address: string) => {
   return `${address.slice(0, 5)}...${address.slice(-5)}`;
 };
@@ -27,6 +20,11 @@ interface SendMoneyProps extends WalletCardProps, ModalProps {
 type addressBookType = {
   name: string,
   address: string,
+
+}
+type GasItems = {
+  estimatedGasFee: string,
+  gasPriceGwei: string,
 
 }
 
@@ -40,6 +38,7 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({ isOpen, onClose,scannedA
   const [searchResults, setSearchResults] = useState<Array<addressBookType>>([]);
   const [selectedAddress, setSelectedAddress] = useState('');
   const [gasPrice, setGasPrice] = useState<string | null>(null);
+  const [estimatedGasPrice, setEstimatedGasPrice] = useState<string | null>(null);
   const [showConfirmation, setShowConfirmation] = useState(false);
 
   useEffect(() => {
@@ -71,8 +70,9 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({ isOpen, onClose,scannedA
 
   const getGasPrice = async () => {
     try {
-      const price = await fetchGasPrice();
-      setGasPrice(price);
+      const price : GasItems = await fetchGasPrice();
+      setGasPrice(price.gasPriceGwei);
+      setEstimatedGasPrice(price.estimatedGasFee);
     } catch (err) {
       console.error('Error fetching gas price:', err);
       setGasPrice(null);
@@ -102,7 +102,12 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({ isOpen, onClose,scannedA
   };
 
   const handleSend = async () => {
-    setShowConfirmation(true);
+    if (/^0x[a-fA-F0-9]{40}$/.test(recipient || '')) {
+      setShowConfirmation(true);      
+    } else {
+      toast.error("Invalid Ethereum address format");
+    }
+   
   };
 
   const confirmSend = async () => {
@@ -178,7 +183,7 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({ isOpen, onClose,scannedA
               <p className="mb-1 text-sm">To: {trimAddress(selectedAddress)}</p>
               <p className="mb-1 text-sm">Amount: {amount} ETH</p>
               <p className="mb-1 text-sm">Gas Price: {gasPrice} Gwei</p>
-              <p className="mb-3 text-sm">Estimated Gas Fee: {parseFloat(gasPrice || '0') * 21000 / 1e9} ETH</p>
+              <p className="mb-3 text-sm">Estimated Gas Fee: {estimatedGasPrice} ETH</p>
             </div>
           )}
         </div>

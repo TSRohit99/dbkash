@@ -4,13 +4,12 @@ import type { NextRequest } from 'next/server';
 import { jwtVerify } from 'jose';
 
 export async function middleware(request: NextRequest) {
-  console.log('Executing middleware');
 
   if (request.nextUrl.pathname.startsWith('/api/v1')) {
     const token = request.cookies.get('jwt')?.value;
 
     if (!token) {
-      console.log('No JWT token found in cookies');
+      console.warn('No JWT token found in cookies');
       return new NextResponse(
         JSON.stringify({ success: false, message: 'Authentication required!' }),
         { status: 401, headers: { 'Content-Type': 'application/json' } }
@@ -19,8 +18,6 @@ export async function middleware(request: NextRequest) {
 
     try {
       const { payload } = await jwtVerify(token, new TextEncoder().encode(process.env.JWT_SECRET as string));
-      console.log('Verified JWT:', payload);
-
       const address = (payload as { address: string }).address;
       if (!address) {
         console.error('Address not found in decoded JWT');

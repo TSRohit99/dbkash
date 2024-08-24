@@ -4,6 +4,7 @@ import React, { createContext, useState, useContext, ReactNode, useCallback, use
 import { connectWallet } from '../lib/web3/etherutiles';
 import { UtilFuncsResponse } from '@/types/UtilFuncsResponse';
 import { flushCookie } from '@/helpers/flushCookie';
+import toast from 'react-hot-toast';
 
 interface WalletContextType {
   address: string | null;
@@ -42,19 +43,29 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (typeof window !== "undefined" && window.ethereum) {
       // Listener for account changes
-      window.ethereum.on('accountsChanged', (accounts: string[]) => {
-        if (accounts.length > 0) {
-          flushCookie();
-          sessionStorage.removeItem('walletAddress');
-          const newAddress = accounts[0].toLowerCase();
-          setAddress(newAddress);
-          sessionStorage.setItem('walletAddress', newAddress);
-        } else {
-          disconnect(); // Handle when the user disconnects their wallet
+      const handleAccountsChanged = (accounts: string[]) => {
+        if (address) {  // Only proceed if there's a current address (user is connected)
+          if (accounts.length > 0) {
+            const newAddress = accounts[0].toLowerCase();
+            if (newAddress !== address) {
+              toast.error('Account changed! Please login with this address.');
+              disconnect();
+            }
+          } else {
+            // If accounts array is empty, it means the user has disconnected their wallet
+            disconnect();
+          }
         }
-      });
+      };
+
+      window.ethereum.on('accountsChanged', handleAccountsChanged);
+
+      // Cleanup function to remove the event listener
+      return () => {
+        window.ethereum?.removeListener('accountsChanged', handleAccountsChanged);
+      };
     }
-  }, [disconnect]);
+  }, [address, disconnect]);
 
   return (
     <WalletContext.Provider

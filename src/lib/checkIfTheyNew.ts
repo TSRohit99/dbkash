@@ -4,8 +4,7 @@ export async function checkIfTheyNew(): Promise<boolean> {
     try {
         // Check if user exists
         const response = await axios.get('/api/v1/user');
-        console.log('res ', response)
-        
+       
         if (response.data.success) {
             console.log('Existing user detected!');
             return false; // User exists, so they're not new
@@ -29,7 +28,6 @@ export async function checkIfTheyNew(): Promise<boolean> {
             return true; // New user was created
         } else {
             console.error('Failed to add new user');
-            console.log(res);
             throw new Error('Error on creating new user!');
         }
     } catch (error) {
