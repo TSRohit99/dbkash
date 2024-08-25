@@ -5,14 +5,6 @@ import { headers } from 'next/headers'
 
 export async function POST(): Promise<Response> {
     const address = headers().get("x-user-address");
-    
-    if (!address) {
-        return createResponse({
-            success: false,
-            message: "No user address provided"
-        }, 400);
-    }
-
     try {
         await dbConnect();
         console.log("Connected to database, attempting to create data...");

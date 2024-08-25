@@ -54,6 +54,7 @@ const Announcements : React.FC = () => {
             <Image 
               src={announcements[currentIndex].image}
               alt={announcements[currentIndex].title}
+              priority={true}
               width={900}
               height={500}
               className="object-cover"

@@ -7,19 +7,8 @@ export async function GET(): Promise<Response> {
 
   const address = headers().get("x-user-address");
 
-  await dbConnect();
-
-  if (!address) {
-    return createResponse(
-      {
-        success: false,
-        message: "No address provided",
-      },
-      400
-    );
-  }
-
   try {
+    await dbConnect();
     console.log("Connected to database, attempting to fetch data...");
     const user = await userModel.findOne({ address });
     console.log("Data fetched...");

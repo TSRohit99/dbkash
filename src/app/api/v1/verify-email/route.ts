@@ -10,10 +10,9 @@ export async function POST(request: Request): Promise<Response> {
     const req = await request.json();
     const {verificationCode } = req;
     const address = headers().get("x-user-address");
-    
-    await dbConnect();
-    
+        
     try {
+        await dbConnect();
         const user = await userModel.findOne({ address: address });
         
         if (!user) {

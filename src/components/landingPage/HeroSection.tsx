@@ -4,12 +4,12 @@ const HeroSection : React.FC= ()=> {
     return (
       <div>
         <section className="container mx-auto px-4 pt-28 md:pt-24 pb-16 text-center max-w-full ">
-          <h1 className=" text-3xl md:text-5xl md:hover:text-[2.9rem] font-bold mb-6 text-white animate-slideIn">
+          <h1 className=" text-3xl md:text-5xl font-bold mb-6 text-white animate-slideIn">
             Revolutionizing Bangladesh's Digital Economy with 
             <span className="text-[#1199fa]"> d</span>
             <span className="text-white">BKash</span>
           </h1>
-          <p className="text-sm md:text-xl md:hover:text-[1.3rem] mb-8 text-[#7f8fa4] hover:text-[#d4d6d9] max-w-3xl mx-auto animate-slideIn">
+          <p className="text-sm md:text-xl  mb-8 text-[#7f8fa4] hover:text-[#d4d6d9] max-w-3xl mx-auto animate-slideIn">
             Experience a decentralized revolution in mobile financial services with dBKash. Say goodbye to fraud, KYC hassles, transaction limits, and centralization.
           </p>
           <Link href={'/dashboard'} >

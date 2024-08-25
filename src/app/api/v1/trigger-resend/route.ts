@@ -9,14 +9,17 @@ export async function POST(request: Request): Promise<Response> {
     const req = await request.json();
     const {email, name } = req;
     const address = headers().get("x-user-address");
-    await dbConnect();
-    if (await userModel.findOne({email})) {
-        return createResponse({
-            success: false,
-            message: "This email is already registered!"
-        }, 400);
-    }
+    
     try {
+        await dbConnect();
+
+        if (await userModel.findOne({email})) {
+            return createResponse({
+                success: false,
+                message: "This email is already registered!"
+            }, 400);
+        }
+
         console.log("Connected to database, attempting to verify email...");
         const verifyCode = Math.floor(1000 + Math.random() * 9000).toString();
         const hashedVerifyCode = await bcrypt.hash(verifyCode, 10);

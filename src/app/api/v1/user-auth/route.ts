@@ -7,7 +7,7 @@ export async function POST(request: Request): Promise<Response> {
     const req = await request.json();
     const { signature , address } = req;
     
-    if (!address || !address ) {
+    if (!address || !signature ) {
         return createResponse({
             success: false,
             message: "No user address/signature provided"
