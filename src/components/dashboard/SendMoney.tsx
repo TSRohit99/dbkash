@@ -83,6 +83,7 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({ isOpen, onClose,scannedA
   const handleRecipientChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
     setRecipient(value);
+    setSelectedAddress(value);
     
     if (value.length > 0) {
       const results = addressBook.filter(entry => 
@@ -102,24 +103,39 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({ isOpen, onClose,scannedA
   };
 
   const handleSend = async () => {
-    if (/^0x[a-fA-F0-9]{40}$/.test(recipient || '')) {
+    if (/^0x[a-fA-F0-9]{40}$/.test(selectedAddress)) {
       setShowConfirmation(true);      
     } else {
       toast.error("Invalid Ethereum address format");
     }
-   
   };
-
   const confirmSend = async () => {
-    const result = await sendMoney(selectedAddress, amount);
-    if (result.success) {
-      toast.success(`Transaction successful!`);
-      router.refresh();
-      onClose();
-    } else {
-      toast.error(`Transaction failed: ${result.error}`);
+    const toastId = toast.loading("Executing the transaction...", {
+      duration: 20000,
+    });
+  
+    try {
+      const result = await sendMoney(selectedAddress, amount);
+      
+      if (result.success) {
+        toast.dismiss(toastId);
+        toast.success("Transaction successful!", {
+          duration: 5000,
+        });
+        await router.refresh();
+        onClose();
+      } else {
+        throw new Error(result.error);
+      }
+    } catch (error : any) {
+      console.error("Transaction failed:", error);
+      toast.dismiss(toastId);
+      toast.error(`Transaction failed: ${error.message}`, {
+        duration: 7000,
+      });
+    } finally {
+      setShowConfirmation(false);
     }
-    setShowConfirmation(false);
   };
 
   const handleClose = () => {

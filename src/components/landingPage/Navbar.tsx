@@ -100,8 +100,7 @@ const Navbar : React.FC =()=> {
           
         }
         <button onClick={()=>{ 
-          setIsModalOpen(false)
-          setIsWalletModalOpen(true)}} className='ml-4 mt-2 mb-2 '> Quick Overview </button>
+          setIsModalOpen(true)}} className='ml-4 mt-2 mb-2 '> Quick Overview </button>
          <div className=' flex items-center justify-center'>
 
           <button onClick={()=>{ 

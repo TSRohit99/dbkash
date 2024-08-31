@@ -87,8 +87,13 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
 
   const fetchBalance = async () => {
     if (address) {
-      const balanceValue: any = await getBalance(address);
+      try {
+        const balanceValue: any = await getBalance(address);
       setWalletBalance(parseFloat(balanceValue).toFixed(6));
+      } catch (error) {
+        console.error("Error Fetching Balance : ", error);
+      }
+      
     }
   };
 

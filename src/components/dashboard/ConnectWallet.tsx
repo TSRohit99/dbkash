@@ -1,12 +1,13 @@
 "use client";
 
-import React from 'react';
+import React,{useState} from 'react';
 import toast from 'react-hot-toast';
 import { FiX } from 'react-icons/fi';
 import { ModalProps } from '@/types/ModalProps';
 import { useWallet } from '../../context/WalletProvider';
 import {UtilFuncsResponse} from '../../types/UtilFuncsResponse'
 import { useRouter } from 'next/navigation';
+import LoadingPage from '@/app/dashboard/loading';
 
 
 
@@ -14,20 +15,26 @@ const ConnectMetamask: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   if (!isOpen) return null;
   const { connect} = useWallet();
   const router = useRouter();
+  const [isLoading , setIsLoading] = useState<boolean>(false);
 
   const handleConnect = async () => {
-   
-    const res : UtilFuncsResponse | undefined = await connect();
-    
-    if (res?.success) {
-      router.replace('/dashboard');
-      toast.success("Successfully logged in!");
-      onClose();
-    } else {
-      if(res?.error)
-      toast.error( res.error);
-    else
-      toast.error("Failed to connect wallet.");
+    setIsLoading(true);
+  
+    try {
+      const res: UtilFuncsResponse | undefined = await connect();
+  
+      if (res?.success) {
+        router.replace('/dashboard');
+        toast.success("Successfully logged in!");
+        onClose();
+      } else {
+        throw new Error(res?.error || "Failed to connect wallet.");
+      }
+    } catch (error) {
+      console.error("Connection error:", error);
+      toast.error(error instanceof Error ? error.message : "An unexpected error occurred.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -38,6 +45,7 @@ const ConnectMetamask: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
   }
   return (
+    (isLoading ? <LoadingPage /> :
     <div className="fixed mt-72 inset-0 bg-gradient-to-br z-50 flex justify-center items-center p-4 pb-48">
       <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
         <button
@@ -67,6 +75,7 @@ const ConnectMetamask: React.FC<ModalProps> = ({ isOpen, onClose }) => {
         </div>
       </div>
     </div>
+    )
   );
 };
 
