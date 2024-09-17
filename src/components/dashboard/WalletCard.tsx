@@ -12,7 +12,7 @@ import { LuLogOut } from "react-icons/lu";
 import Link from "next/link";
 import WalletQR from "./ShowQR";
 import { copyToClipboard } from '@/helpers/CopyItem';
-import { getBalance } from '../../lib/web3/etherutiles';
+import { getBalances } from '../../lib/web3/etherutiles';
 import { useWallet } from "@/context/WalletProvider";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -22,6 +22,7 @@ import { WalletCardProps } from "@/types/WalletCardProps";
 import SettingsModal from "./Settings";
 import axios from "axios";
 import { checkIfTheyNew } from "@/lib/checkIfTheyNew";
+import getTokenPriceInUSD from "@/helpers/getPriceInUsd";
 
 const addressTrimmer = (address: string | null) => {
   return address ? (`${address.slice(0, 4)}...${address.slice(-3)}`).toLowerCase() : null;
@@ -38,6 +39,7 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [isSMModalOpen, setIsSMModalOpen] = useState(false);
   const [isSTModalOpen, setIsSTModalOpenn] = useState(false);
+  const usdPrice = 118; // hardcoded for now.
 
 
 
@@ -88,8 +90,11 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
   const fetchBalance = async () => {
     if (address) {
       try {
-        const balanceValue: any = await getBalance(address);
-      setWalletBalance(parseFloat(balanceValue).toFixed(6));
+        const balanceValue: any = await getBalances(address);
+        const res = await getTokenPriceInUSD("ethereum");
+        const ethToBDT = parseFloat(balanceValue?.ETH)*res.price*usdPrice;
+        const totalBal = (parseFloat(balanceValue?.BDT) + parseFloat(balanceValue?.USD)*usdPrice + ethToBDT );
+        setWalletBalance(totalBal.toFixed(2));
       } catch (error) {
         console.error("Error Fetching Balance : ", error);
       }
@@ -134,7 +139,7 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
               )}</div> 
         <div className="text-4xl font-bold mb-2  flex flex-row">{walletBalance||(
                 <Skeleton className="h-7 w-[58px] mt-2 bg-white" />
-              )} ETH</div>
+              )} BDT</div>
         <div className="flex mt-4 gap-2">
           <div className="text-sm">{trimmedWalletAddress ||(
                 <Skeleton className="h-4 w-[60px] bg-white" />

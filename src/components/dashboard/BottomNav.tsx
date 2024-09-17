@@ -4,10 +4,12 @@ import React, { useState } from "react";
 import { FiHome, FiCamera, FiList } from "react-icons/fi";
 import QRScanner from "./ScanQR";
 import { BottomNavProps } from "@/types/BottomNavProps";
+import TransactionHistoryModal from "./TxnHistory";
 
 const BottomNav : React.FC<BottomNavProps> = ({handleAddressScanned}) => {
   const [active, setActive] = useState("Home");
   const [isQRScanModalOpen, seIsQRScanModalOpen] = useState(false);
+  const [isTxnModalOpen, setIsTxnModalOpen] = useState(false);
 
   const onScanned = (address: string) => {
     handleAddressScanned(address);
@@ -30,7 +32,11 @@ const BottomNav : React.FC<BottomNavProps> = ({handleAddressScanned}) => {
           }`}
           onClick={() => {setActive(navItem.label)
             if(navItem.label==="Scan QR"){
+              setIsTxnModalOpen(false);
               seIsQRScanModalOpen(true);
+            } else if(navItem.label==="Txns"){
+              seIsQRScanModalOpen(false);
+              setIsTxnModalOpen(true);
             }
           }}
         >
@@ -43,6 +49,7 @@ const BottomNav : React.FC<BottomNavProps> = ({handleAddressScanned}) => {
 
     </div>
     <QRScanner isOpen={isQRScanModalOpen}onClose={()=>seIsQRScanModalOpen(false)} handleAddressScanned={onScanned} />
+      <TransactionHistoryModal isOpen={isTxnModalOpen} onClose={()=> setIsTxnModalOpen(false)}/>
     </>
   );
 };

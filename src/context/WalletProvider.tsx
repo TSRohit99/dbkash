@@ -1,13 +1,15 @@
 'use client';
 
 import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
-import { connectWallet } from '../lib/web3/etherutiles';
+import { connectWallet, fetchTxns } from '../lib/web3/etherutiles';
 import { UtilFuncsResponse } from '@/types/UtilFuncsResponse';
 import { flushCookie } from '@/helpers/flushCookie';
 import toast from 'react-hot-toast';
+import { Transaction } from '@/types/TxnHistoryTypes';
 
 interface WalletContextType {
   address: string | null;
+  txns?: Array<Transaction> | [];
   connect: () => Promise<UtilFuncsResponse | undefined>;
   disconnect: () => void;
 }
@@ -22,16 +24,29 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     return null;
   });
 
+  const [txns, setTxns] = useState<Array<Transaction>>([])
+
   const connect = useCallback(async () => {
     const response: UtilFuncsResponse = await connectWallet();
     if (response.success && response.address) {
       const newAddress = response.address.toLowerCase();
       setAddress(newAddress);
       sessionStorage.setItem('walletAddress', newAddress);
+      await fetchTransactions(newAddress);
     } else {
       console.error(response.error);
     }
     return response;
+  }, []);
+
+  const fetchTransactions = useCallback(async (address : string) => {
+    const response: UtilFuncsResponse = await fetchTxns(address);
+    if (response.success && response.txns) {
+      setTxns(response.txns)
+    } else {
+      console.error(response.error);
+    }
+    return txns;
   }, []);
 
   const disconnect = useCallback(() => {
@@ -39,6 +54,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     sessionStorage.removeItem('walletAddress');
     flushCookie();
   }, []);
+
 
   useEffect(() => {
     if (typeof window !== "undefined" && window.ethereum) {
