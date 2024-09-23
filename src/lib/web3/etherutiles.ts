@@ -1,3 +1,4 @@
+import axios from 'axios';
 import { UtilFuncsResponse } from "@/types/UtilFuncsResponse";
 import { ethers } from "ethers";
 import { checkIfTheyNew } from "../checkIfTheyNew";
@@ -6,31 +7,25 @@ import { TokenInfo, TokenType } from "@/types/TokenInfo";
 import { ERC20_ABI } from "./ERC20Abi";
 import { Transaction, TransactionType } from "@/types/TxnHistoryTypes";
 
-const ARBITRUM_SEPOLIA_RPC =
-  "https://sepolia-rollup.arbitrum.io/rpc";
+const ARBITRUM_SEPOLIA_RPC = "https://sepolia-rollup.arbitrum.io/rpc";
 const BDT_ADDRESS = "0xf327e19106F172eE87Fb65896ACfc0757069BA3A";
 const USD_ADDRESS = "0x127490E895Cc21eAC9e247eeF157021db78F9061";
 
 export const getProvider = () => {
   if (typeof window !== "undefined" && window.ethereum) {
-    return new ethers.providers.Web3Provider(window.ethereum);
+    return new ethers.BrowserProvider(window.ethereum);
   } else {
-    return new ethers.providers.JsonRpcProvider(ARBITRUM_SEPOLIA_RPC);
+    return new ethers.JsonRpcProvider(ARBITRUM_SEPOLIA_RPC);
   }
 };
 
 export const getCurrentNetwork = async (): Promise<string | null> => {
-  if (typeof window !== "undefined" && window.ethereum?.request) {
-    try {
-      const { chainId } = await window.ethereum.request({
-        method: "eth_chainId",
-      });
-      return chainId;
-    } catch (error) {
-      console.error("Failed to get current network:", error);
-      return null;
-    }
-  } else {
+  const provider = getProvider();
+  try {
+    const network = await provider.getNetwork();
+    return network.chainId.toString();
+  } catch (error) {
+    console.error("Failed to get current network:", error);
     return null;
   }
 };
@@ -38,21 +33,19 @@ export const getCurrentNetwork = async (): Promise<string | null> => {
 export const connectWallet = async (): Promise<UtilFuncsResponse> => {
   if (typeof window !== "undefined" && window.ethereum?.request) {
     try {
-      const currentNetwork = await getCurrentNetwork(); // Fetch current network
+      const currentNetwork = await getCurrentNetwork();
       const sepoliaChainId = "0x66eee"; // Chain ID for Arbitrum Sepolia
 
       if (currentNetwork !== sepoliaChainId) {
-        // If not on Sepolia, switch to it
         const switchResponse = await switchToArbitrumSepolia();
         if (!switchResponse.success) {
           return { success: false, error: switchResponse.error };
         }
       }
 
-      // Proceed with connecting the wallet
       await window.ethereum.request({ method: "eth_requestAccounts" });
       const provider = getProvider();
-      const signer = provider.getSigner();
+      const signer = await provider.getSigner();
       const address = (await signer.getAddress()).toLowerCase();
       const msg = "Hello Anon! Welcoming you to dBKash.";
       const signature = await signer.signMessage(msg);
@@ -71,34 +64,29 @@ export const connectWallet = async (): Promise<UtilFuncsResponse> => {
   }
 };
 
+
 export const switchToArbitrumSepolia = async (): Promise<UtilFuncsResponse> => {
-  const chainId = "0x66eee"; // Chain ID for Arbitrum Sepolia
-  if (typeof window !== "undefined" && window.ethereum?.request) {
+  const provider = getProvider();
+  if (provider instanceof ethers.BrowserProvider) {
     try {
-      await window.ethereum.request({
-        method: "wallet_switchEthereumChain",
-        params: [{ chainId }],
-      });
+      await provider.send("wallet_switchEthereumChain", [{ chainId: "0x66eee" }]);
       return { success: true };
     } catch (error: any) {
       if (error.code === 4902) {
         try {
-          await window.ethereum.request({
-            method: "wallet_addEthereumChain",
-            params: [
-              {
-                chainId,
-                chainName: "Arbitrum Sepolia",
-                nativeCurrency: {
-                  name: "Ethereum",
-                  symbol: "ETH",
-                  decimals: 18,
-                },
-                rpcUrls: [ARBITRUM_SEPOLIA_RPC],
-                blockExplorerUrls: ["https://sepolia.arbiscan.io/"],
+          await provider.send("wallet_addEthereumChain", [
+            {
+              chainId: "0x66eee",
+              chainName: "Arbitrum Sepolia",
+              nativeCurrency: {
+                name: "Ethereum",
+                symbol: "ETH",
+                decimals: 18,
               },
-            ],
-          });
+              rpcUrls: [ARBITRUM_SEPOLIA_RPC],
+              blockExplorerUrls: ["https://sepolia.arbiscan.io/"],
+            },
+          ]);
           return { success: true };
         } catch (addError) {
           console.error("Failed to add Arbitrum Sepolia network:", addError);
@@ -116,9 +104,10 @@ export const switchToArbitrumSepolia = async (): Promise<UtilFuncsResponse> => {
       };
     }
   } else {
-    return { success: false, error: "MetaMask not detected" };
+    return { success: false, error: "Browser provider not available" };
   }
 };
+
 
 export const getBalances = async (
   address: string
@@ -141,9 +130,9 @@ export const getBalances = async (
     const usdBalance = await usdContract.balanceOf(address);
 
     return {
-      ETH: ethers.utils.formatEther(ethBalance),
-      BDT: ethers.utils.formatUnits(bdtBalance, 18),
-      USD: ethers.utils.formatUnits(usdBalance, 18),
+      ETH: ethers.formatEther(ethBalance),
+      BDT: ethers.formatUnits(bdtBalance, 18),
+      USD: ethers.formatUnits(usdBalance, 18),
     };
   } catch (error) {
     console.error("Failed to get balances:", error);
@@ -162,164 +151,111 @@ export const sendMoney = async (
   amount: string,
   tokenType: TokenType
 ): Promise<UtilFuncsResponse> => {
-  if (typeof window === "undefined" || !window.ethereum) {
-    return { success: false, error: "MetaMask not detected" };
-  }
+  const provider = getProvider();
+  if (provider instanceof ethers.BrowserProvider) {
+    try {
+      const signer = await provider.getSigner();
+      const tokenInfo = TOKEN_INFO[tokenType];
 
-  try {
-    const provider = getProvider();
-    const signer = provider.getSigner();
-    const tokenInfo = TOKEN_INFO[tokenType];
+      if (tokenType === "ETH") {
+        // Handle ETH transfer
+        const amountWei = ethers.parseEther(amount);
+        const tx = { to: toAddress, value: amountWei };
+        const transaction = await signer.sendTransaction(tx);
+        await transaction.wait();
+        return { success: true, txnHash: transaction.hash };
+      } else {
+        // Handle ERC20 token transfer
+        const tokenContract = new ethers.Contract(
+          tokenInfo.address,
+          ERC20_ABI,
+          signer
+        );
+        const decimals = tokenInfo.decimals;
+        const amountInSmallestUnit = ethers.parseUnits(amount, decimals);
+        // const gasLimit = BigInt("50000");
+        const gasLimit = await tokenContract.transfer.estimateGas(toAddress, amountInSmallestUnit);
 
-    if (tokenType === "ETH") {
-      // Handle ETH transfer
-      const amountWei = ethers.utils.parseEther(amount);
-      const tx = { to: toAddress, value: amountWei };
-      const transaction = await signer.sendTransaction(tx);
-      await transaction.wait();
-      return { success: true, txnHash: transaction.hash };
-    } else {
-      // Handle ERC20 token transfer
-      const tokenContract = new ethers.Contract(
-        tokenInfo.address,
-        ERC20_ABI,
-        signer
-      );
-      const decimals = tokenInfo.decimals;
-      const amountInSmallestUnit = ethers.utils.parseUnits(amount, decimals);
-      const gasLimit = 500000;
-      const transaction = await tokenContract.transfer(
-        toAddress,
-        amountInSmallestUnit,
-        {
-          gasLimit: gasLimit,
-        }
-      );
-      await transaction.wait();
-      return { success: true, txnHash: transaction.hash };
+        const transaction = await tokenContract.transfer(
+          toAddress,
+          amountInSmallestUnit,
+          {
+            gasLimit: gasLimit,
+          }
+        );
+        await transaction.wait();
+        return { success: true, txnHash: transaction.hash };
+      }
+    } catch (error) {
+      console.error("Failed to send money:", error);
+      return {
+        success: false,
+        error: "Failed to send money. Please check your balance and try again.",
+      };
     }
-  } catch (error) {
-    console.error("Failed to send money:", error);
-    return {
-      success: false,
-      error: "Failed to send money. Please check your balance and try again.",
-    };
+  } else {
+    return { success: false, error: "Browser provider not available" };
   }
 };
 
-// ABI for ERC20 transfer event and a basic payment function
-const ABI = [
-  "event Transfer(address indexed from, address indexed to, uint256 value)",
-  "function pay(address token, uint256 amount) payable",
-];
+const ARBISCAN_API_KEY = 'U9HBDK4QYE6A46UK4RWPWB6PKY1HVMRAD1'; // Replace with your actual Arbiscan API key
+const ARBISCAN_API_URL = 'https://api-sepolia.arbiscan.io/api';
 
-export const fetchTxns = async (
-  address: string
-): Promise<UtilFuncsResponse> => {
+interface ArbiscanTx {
+  hash: string;
+  from: string;
+  to: string;
+  value: string;
+  tokenSymbol: string;
+  tokenDecimal: string;
+  timeStamp: string;
+  gasPrice: string;
+  gasUsed: string;
+}
 
-  console.log("started fetcing txns", address);
-
-  const provider = getProvider();
-  const transactions: Array<Transaction> = [];
+export const fetchTxns = async (address: string): Promise<UtilFuncsResponse> => {
+  console.log("Started fetching Arbitrum txns", address);
 
   try {
-    for (const [tokenType, tokenInfo] of Object.entries(TOKEN_INFO)) {
-      const tokenContract = new ethers.Contract(
-        tokenInfo.address,
-        ABI,
-        provider
-      );
-      if(tokenContract.address == '') continue;
-
-      console.log( tokenContract.address)
-
-      const sentFilter = tokenContract.filters.Transfer(address, null); // Token transfers 'from' your address
-      const receivedFilter = tokenContract.filters.Transfer(null, address); // Token transfers 'to' your address
-
-      const [sentEvents, receivedEvents] = await Promise.all([
-        tokenContract.queryFilter(sentFilter, -1020).catch(() => []),
-        tokenContract.queryFilter(receivedFilter, -1020).catch(() => [])
-      ]);
-      
-
-      const allEvents = [...(sentEvents || []), ...(receivedEvents || [])];
-
-      for (const event of allEvents) {
-        console.log('its on events')
-        if (!event || !event.args) {
-          console.warn(
-            "Encountered undefined event or event without args, skipping..."
-          );
-          continue;
-        }
-
-        try {
-          const receipt = await provider.getTransactionReceipt(
-            event.transactionHash
-          );
-          if (!receipt) {
-            console.warn(
-              `No receipt found for transaction ${event.transactionHash}, skipping...`
-            );
-            continue;
-          }
-
-          const block = await event.getBlock();
-          if (!block) {
-            console.warn(
-              `No block found for event ${event.transactionHash}, skipping...`
-            );
-            continue;
-          }
-
-          let type: TransactionType =
-            ethers.utils.getAddress(event.args.from) ===
-            ethers.utils.getAddress(address)
-              ? "send"
-              : "receive";
-
-          const gasFee = ethers.utils.formatEther(
-            receipt.gasUsed.mul(receipt.effectiveGasPrice)
-          );
-
-          const date = new Date(block.timestamp * 1000);
-          transactions.push({
-            id: event.transactionHash,
-            type: type,
-            amount: ethers.utils.formatUnits(
-              event.args.value,
-              tokenInfo.decimals
-            ),
-            tokenType: tokenType as TokenType,
-            from: event.args.from,
-            to: event.args.to,
-            date: date.toISOString().split("T")[0],
-            time: date.toTimeString().split(" ")[0],
-            gasFee: gasFee,
-          });
-        } catch (error) {
-          console.error(
-            `Error processing event ${event.transactionHash}:`,
-            error
-          );
-        }
+    const response = await axios.get<{ status: string; message: string; result: ArbiscanTx[] }>(ARBISCAN_API_URL, {
+      params: {
+        module: 'account',
+        action: 'tokentx',
+        address: address,
+        startblock: 0,
+        endblock: 99999999,
+        sort: 'desc',
+        apikey: ARBISCAN_API_KEY
       }
+    });
+
+    if (response.data.status !== '1') {
+      throw new Error(`Arbiscan API error: ${response.data.message}`);
     }
 
-    console.log(transactions)
-    // Sort transactions by date, most recent first
-    transactions.sort(
-      (a, b) =>
-        new Date(b.date + " " + b.time).getTime() -
-        new Date(a.date + " " + a.time).getTime()
-    );
-    console.log(transactions);
+    const transactions: any = response.data.result.map((tx: ArbiscanTx) => {
+      const date = new Date(Number(tx.timeStamp) * 1000);
+      return {
+        id: tx.hash,
+        type: tx.from.toLowerCase() === address.toLowerCase() ? 'send' : 'receive',
+        amount: ethers.formatUnits(tx.value, parseInt(tx.tokenDecimal)),
+        tokenType: tx.tokenSymbol,
+        from: tx.from,
+        to: tx.to,
+        date: date.toISOString().split('T')[0],
+        time: date.toTimeString().split(' ')[0],
+        gasFee: ethers.formatEther(
+          ethers.getBigInt(tx.gasPrice) * ethers.getBigInt(tx.gasUsed)
+        ),
+      };
+    });
+
     return {
       success: true,
       txns: transactions,
     };
   } catch (error) {
-    console.error("Error fetching transactions:", error);
+    console.error("Error fetching Arbitrum transactions:", error);
     return {
       success: false,
       txns: [],

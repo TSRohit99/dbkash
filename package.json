@@ -22,7 +22,7 @@
     "clsx": "^2.1.1",
     "cookie-parser": "^1.4.6",
     "dotenv": "^16.4.5",
-    "ethers": "^5.7.1",
+    "ethers": "^6.13.2",
     "jose": "^5.7.0",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.441.0",

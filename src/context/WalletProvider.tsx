@@ -18,13 +18,19 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [address, setAddress] = useState<string | null>(() => {
-    if (typeof window !== "undefined") {
+    if (typeof window !== 'undefined') {
       return sessionStorage.getItem('walletAddress');
     }
     return null;
   });
 
-  const [txns, setTxns] = useState<Array<Transaction>>([])
+  const [txns, setTxns] = useState<Array<Transaction>>(() => {
+    if (typeof window !== 'undefined') {
+      const storedTxns = sessionStorage.getItem('txns');
+      return storedTxns ? JSON.parse(storedTxns) : [];
+    }
+    return [];
+  });
 
   const connect = useCallback(async () => {
     const response: UtilFuncsResponse = await connectWallet();
@@ -32,43 +38,44 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const newAddress = response.address.toLowerCase();
       setAddress(newAddress);
       sessionStorage.setItem('walletAddress', newAddress);
-      await fetchTransactions(newAddress);
+      await fetchTransactions(newAddress); // Fetch and store transactions
     } else {
       console.error(response.error);
     }
     return response;
   }, []);
 
-  const fetchTransactions = useCallback(async (address : string) => {
+  const fetchTransactions = useCallback(async (address: string) => {
     const response: UtilFuncsResponse = await fetchTxns(address);
     if (response.success && response.txns) {
-      setTxns(response.txns)
+      setTxns(response.txns);
+      sessionStorage.setItem('txns', JSON.stringify(response.txns)); // Persist transactions in sessionStorage
+      return response.txns; // Return the fetched transactions
     } else {
       console.error(response.error);
+      return []; // Return an empty array in case of error
     }
-    return txns;
   }, []);
 
   const disconnect = useCallback(() => {
     setAddress(null);
+    setTxns([]); // Clear the transactions
     sessionStorage.removeItem('walletAddress');
+    sessionStorage.removeItem('txns'); // Clear stored transactions
     flushCookie();
   }, []);
 
-
   useEffect(() => {
-    if (typeof window !== "undefined" && window.ethereum) {
-      // Listener for account changes
+    if (typeof window !== 'undefined' && window.ethereum) {
       const handleAccountsChanged = (accounts: string[]) => {
-        if (address) {  // Only proceed if there's a current address (user is connected)
+        if (address) {
           if (accounts.length > 0) {
             const newAddress = accounts[0].toLowerCase();
             if (newAddress !== address) {
-              toast.error('Account changed! Please login with this address.');
+              toast.error('Account changed! Please log in with this address.');
               disconnect();
             }
           } else {
-            // If accounts array is empty, it means the user has disconnected their wallet
             disconnect();
           }
         }
@@ -76,7 +83,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
       window.ethereum.on('accountsChanged', handleAccountsChanged);
 
-      // Cleanup function to remove the event listener
       return () => {
         window.ethereum?.removeListener('accountsChanged', handleAccountsChanged);
       };
@@ -89,6 +95,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         address,
         connect,
         disconnect,
+        txns,
       }}
     >
       {children}

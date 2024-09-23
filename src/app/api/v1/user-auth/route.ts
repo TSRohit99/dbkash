@@ -15,7 +15,7 @@ export async function POST(request: Request): Promise<Response> {
     }
 
     try {
-        const extractedAddress = ethers.utils.verifyMessage("Hello Anon! Welcoming you to dBKash.", signature).toLowerCase();
+        const extractedAddress = ethers.verifyMessage("Hello Anon! Welcoming you to dBKash.", signature).toLowerCase();
         
         if(extractedAddress === address){
 
