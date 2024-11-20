@@ -6,7 +6,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEthereum } from "@fortawesome/free-brands-svg-icons";
 
 const TokensList: React.FC = () => {
-  const {bdtBal, usdBal,ethBal } = useWallet();
+  const { bdtBal, usdBal, ethBal } = useWallet();
 
   const tokensList = [
     {
@@ -59,8 +59,10 @@ const TokensList: React.FC = () => {
               </div>
             </div>
             <div className="text-right ml-4">
-              <div className="font-bold text-sm sm:text-lg text-gray-800 flex items-center justify-end gap-1 sm:gap-2">
-                {token.value ?? (
+              <div className="font-bold text-[13px] sm:text-lg text-gray-800 flex items-center justify-end gap-1 sm:gap-2 flex-wrap">
+                {token.value != null ? (
+                  parseFloat(token.value).toFixed(3)
+                ) : (
                   <Skeleton className="h-4 sm:h-5 w-16 sm:w-20 bg-gray-400 rounded-md" />
                 )}
                 <span className="text-xs sm:text-base">{token.ticker}</span>

@@ -11,12 +11,12 @@ import {
 import { LuLogOut } from "react-icons/lu";
 import Link from "next/link";
 import WalletQR from "./ShowQR";
-import { copyToClipboard } from '@/helpers/CopyItem';
-import { getBalances } from '../../lib/web3/etherutiles';
+import { copyToClipboard } from "@/helpers/CopyItem";
+import { getBalances } from "../../lib/web3/etherutiles";
 import { useWallet } from "@/context/WalletProvider";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from "@/components/ui/skeleton";
 import SendMoneyComponent from "./SendMoney";
 import { WalletCardProps } from "@/types/WalletCardProps";
 import SettingsModal from "./Settings";
@@ -26,22 +26,23 @@ import getTokenPriceInUSD from "@/helpers/getPriceInUsd";
 import SwapInterface from "./Swap";
 
 const addressTrimmer = (address: string | null) => {
-  return address ? (`${address.slice(0, 4)}...${address.slice(-3)}`).toLowerCase() : null;
-}
+  return address
+    ? `${address.slice(0, 4)}...${address.slice(-3)}`.toLowerCase()
+    : null;
+};
 
-
-const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
+const WalletInterface: React.FC<WalletCardProps> = ({ scannedAddress }) => {
   const router = useRouter();
   const { address, disconnect, walletBalance, usdPrice } = useWallet();
-  const [trimmedWalletAddress, setTrimmedWalletAddress] = useState<string | null>(null);
-  const [userName, setUserName] = useState<string>('');
-  const [userEmail, setUserEmail] = useState<string>('');
+  const [trimmedWalletAddress, setTrimmedWalletAddress] = useState<
+    string | null
+  >(null);
+  const [userName, setUserName] = useState<string>("");
+  const [userEmail, setUserEmail] = useState<string>("");
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [isSMModalOpen, setIsSMModalOpen] = useState(false);
   const [isSTModalOpen, setIsSTModalOpen] = useState(false);
   const [isSwapModalOPen, setIsSwapModalOpen] = useState(false);
-
-
 
   useEffect(() => {
     if (address) {
@@ -59,47 +60,46 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
 
   const getInfo = async () => {
     try {
-      const response = await axios.get('/api/v1/user');
-      if(await response.data.success){
-      const data = await response.data.data ;
-      setUserName(await data.username);
-      const emailValue = await data.email || '';
-      setUserEmail(emailValue);
-      }else{
-        console.error('Couldnt get info!')
+      const response = await axios.get("/api/v1/user");
+      if (await response.data.success) {
+        const data = await response.data.data;
+        setUserName(await data.username);
+        const emailValue = (await data.email) || "";
+        setUserEmail(emailValue);
+      } else {
+        console.error("Couldnt get info!");
       }
-    } catch (err : any) {
-      if(!await err.response.data.success){
-        console.log("Checking if its a new user wallet....")
-        if(address){
-        try {
-          await checkIfTheyNew();
-        } catch (error) {
-          console.error("Error creating new account while accountChanged :", error)
-        } finally{
-         window.location.reload();
+    } catch (err: any) {
+      if (!(await err.response.data.success)) {
+        console.log("Checking if its a new user wallet....");
+        if (address) {
+          try {
+            await checkIfTheyNew();
+          } catch (error) {
+            console.error(
+              "Error creating new account while accountChanged :",
+              error
+            );
+          } finally {
+            window.location.reload();
+          }
         }
       }
-      }
-    
-      console.error('Error fetching userInfo:', err);
+
+      console.error("Error fetching userInfo:", err);
     }
   };
 
-
-
-
   const handleDisconnect = () => {
     disconnect();
-    router.replace('/');
-    if (address === null) toast.error('Could not log out!');
-    else toast.success('Successfully logged out!');
-    
+    router.replace("/");
+    if (address === null) toast.error("Could not log out!");
+    else toast.success("Successfully logged out!");
   };
 
-  const handleSettings = ()=> {
-    setIsSTModalOpen(true)
-  }
+  const handleSettings = () => {
+    setIsSTModalOpen(true);
+  };
 
   return (
     <>
@@ -120,16 +120,23 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
           </div>
         </div>
 
-        <div className="text-lg font-bold mb-2">{userName ||(
-                <Skeleton className="h-5 w-[80px] bg-white" />
-              )}</div> 
-        <div className="text-4xl font-bold mb-2  flex flex-row">{walletBalance||(
-                <Skeleton className="h-7 w-[58px] mt-2 bg-white" />
-              )} BDT</div>
+        <div className="text-lg font-bold mb-2">
+          {userName || <Skeleton className="h-5 w-[80px] bg-white" />}
+        </div>
+        <div className="text-4xl font-bold mb-2 flex flex-row">
+          {walletBalance != null && walletBalance !== undefined ? (
+            `${parseFloat(walletBalance).toFixed(3)} BDT`
+          ) : (
+            <Skeleton className="h-7 w-[58px] mt-2 bg-white" />
+          )}
+        </div>
+
         <div className="flex mt-4 gap-2">
-          <div className="text-sm">{trimmedWalletAddress ||(
-                <Skeleton className="h-4 w-[60px] bg-white" />
-              )}</div>
+          <div className="text-sm">
+            {trimmedWalletAddress || (
+              <Skeleton className="h-4 w-[60px] bg-white" />
+            )}
+          </div>
           <div className="flex justify-center items-center hover:bg-blue-400 transition duration-300">
             <button onClick={() => copyToClipboard(address)}>
               <FiCopy />
@@ -147,9 +154,9 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
           </button>
 
           <button
-          onClick={()=>{
-            setIsSMModalOpen(true);
-          }}
+            onClick={() => {
+              setIsSMModalOpen(true);
+            }}
             className="bg-white hover:bg-blue-100 transition duration-300 hover:p-2 w-1/4 text-blue-500 rounded-lg p-3 flex flex-col items-center"
           >
             <FiArrowUp />
@@ -157,9 +164,9 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
           </button>
 
           <button
-          onClick={()=>{
-            setIsSwapModalOpen(true);
-          }}
+            onClick={() => {
+              setIsSwapModalOpen(true);
+            }}
             className="bg-white hover:bg-blue-100 transition duration-300 hover:p-2 w-1/4 text-blue-500 rounded-lg p-3 flex flex-col items-center"
           >
             <FiRefreshCw />
@@ -168,24 +175,29 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
         </div>
       </div>
 
-      <WalletQR address={address} isOpen={isQrModalOpen} onClose={() => setIsQrModalOpen(false)} />
-      <SettingsModal isOpen={isSTModalOpen} 
-      onClose={() => setIsSTModalOpen(false)}
-      username={userName}
-      setUsername={setUserName}
-      userEmail ={userEmail}
-      setUserEmail ={setUserEmail}
-       />
-      <SendMoneyComponent 
-        isOpen={isSMModalOpen} 
-        onClose={()=>setIsSMModalOpen(false)} 
+      <WalletQR
+        address={address}
+        isOpen={isQrModalOpen}
+        onClose={() => setIsQrModalOpen(false)}
+      />
+      <SettingsModal
+        isOpen={isSTModalOpen}
+        onClose={() => setIsSTModalOpen(false)}
+        username={userName}
+        setUsername={setUserName}
+        userEmail={userEmail}
+        setUserEmail={setUserEmail}
+      />
+      <SendMoneyComponent
+        isOpen={isSMModalOpen}
+        onClose={() => setIsSMModalOpen(false)}
         scannedAddress={scannedAddress}
-        />
+      />
 
-      <SwapInterface 
-        isOpen={isSwapModalOPen} 
-        onClose={()=>setIsSwapModalOpen(false)} 
-        />
+      <SwapInterface
+        isOpen={isSwapModalOPen}
+        onClose={() => setIsSwapModalOpen(false)}
+      />
     </>
   );
 };
