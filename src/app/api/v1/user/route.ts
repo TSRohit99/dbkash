@@ -5,7 +5,7 @@ import { headers } from "next/headers";
 
 export async function GET(): Promise<Response> {
 
-  const address = headers().get("x-user-address");
+  const address = (await headers()).get("x-user-address");
 
   try {
     await dbConnect();

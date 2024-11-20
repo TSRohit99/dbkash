@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { sendMoney } from "../../lib/web3/etherutiles";
+import { getBalances, sendMoney } from "../../lib/web3/etherutiles";
 import { ModalProps } from "@/types/ModalProps";
 import {
   FiChevronDown,
@@ -14,6 +14,9 @@ import { WalletCardProps } from "@/types/WalletCardProps";
 import { useRouter } from "next/navigation";
 import { useWallet } from "@/context/WalletProvider";
 import axios from "axios";
+import { addressBookType } from "@/types/AddressBook";
+import { TokenType } from "@/types/TokenInfo";
+import getTokenPriceInUSD from "@/helpers/getPriceInUsd";
 
 const trimAddress = (address: string) => {
   return `${address.slice(0, 5)}...${address.slice(-5)}`;
@@ -23,22 +26,13 @@ interface SendMoneyProps extends WalletCardProps, ModalProps {
   scannedAddress?: string;
 }
 
-type addressBookType = {
-  name: string;
-  address: string;
-};
-
-type TokenType = "ETH" | "BDT" | "USD";
-
 const SendMoneyComponent: React.FC<SendMoneyProps> = ({
   isOpen,
   onClose,
   scannedAddress,
 }) => {
-  if (!isOpen) return null;
 
-  const { address } = useWallet();
-  const router = useRouter();
+  const { address,usdPrice, setBdtBal, walletBalance, setEthBal,setUsdBal,setWalletBalance,bdtBal, usdBal,ethBal } = useWallet();
   const [addressBook, setAddressBook] = useState<Array<addressBookType>>([]);
   const [recipient, setRecipient] = useState(scannedAddress || "");
   const [amount, setAmount] = useState("");
@@ -48,6 +42,7 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({
   const [selectedAddress, setSelectedAddress] = useState("");
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [selectedToken, setSelectedToken] = useState<TokenType>("BDT");
+
 
   useEffect(() => {
     if (isOpen) {
@@ -110,11 +105,24 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({
       toast.error("Invalid Ethereum address format");
     }
   };
+
+  const updateWalletBalance = async (amount : string) => {
+    if (walletBalance !== null) {
+      try {
+        const conv : any = await getTokenPriceInUSD("ethereum");
+        const newBalance = (parseFloat(walletBalance) - parseFloat(amount) * conv.price * usdPrice).toString();
+        setWalletBalance(newBalance);
+      } catch (error) {
+        console.error("Failed to fetch token price or update balance:", error);
+      }
+    }
+  };
+  
   
 
   const confirmSend = async () => {
     const toastId = toast.loading("Executing the transaction...", {
-      duration: 20000,
+      duration: 30000,
     });
   
     try {
@@ -130,10 +138,58 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({
         toast.success("Transaction successful!", {
           duration: 5000,
         });
-        await router.refresh();
+  
+        if (selectedToken === "BDT") {
+          setBdtBal((prev: string | null) => {
+            if (prev) {
+              return (parseFloat(prev) - parseFloat(amount)).toString();
+            }
+            return bdtBal;
+          });
+  
+          setWalletBalance((prev: string | null) => {
+            if (prev) {
+              return (parseFloat(prev) - parseFloat(amount)).toString();
+            }
+            return walletBalance ;
+          });
+
+        } else if (selectedToken === "USD") {
+          setUsdBal((prev: string | null) => {
+            if (prev) {
+              return (parseFloat(prev) - parseFloat(amount)).toString();
+            }
+            return usdBal;
+          });
+
+          setWalletBalance((prev: string | null) => {
+            if (prev) {
+              return (parseFloat(prev) - parseFloat(amount)*usdPrice).toString();
+            }
+            return walletBalance ;
+          });
+
+          
+
+        } else if (selectedToken === "ETH") {
+          setEthBal((prev: string | null) => {
+            if (prev) {
+              return (parseFloat(prev) - parseFloat(amount)).toString();
+            }
+            return ethBal;
+          });
+          await updateWalletBalance(amount);
+
+          
+        }
+  
+        // await router.refresh();
         onClose();
       } else {
-        throw new Error();
+        console.error("Transaction failed");
+        toast.error(`Transaction failed on else`, {
+          duration: 2000,
+        });
       }
     } catch (error: any) {
       console.error("Transaction failed:", error);
@@ -145,6 +201,7 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({
       setShowConfirmation(false);
     }
   };
+  
 
   const handleClose = () => {
     setRecipient("");
@@ -156,8 +213,39 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+  const getAmount = () => {
+    if(selectedToken == "BDT"){
+      return bdtBal;
+    }
+    else if(selectedToken == "ETH"){
+      return ethBal;
+    }
+    else if(selectedToken == "USD"){
+      return usdBal;
+    }
+    else null;
+
+  }
+
+  const setMaxAmount = () => {
+    if(selectedToken == "BDT" && bdtBal){
+     setAmount(bdtBal);
+    }
+    else if(selectedToken == "ETH" && ethBal){
+      setAmount(ethBal);
+    }
+    else if(selectedToken == "USD" && usdBal){
+      setAmount(usdBal);
+    }
+    else null;
+
+  }
+
+  if (!isOpen) return null;
+
+  return ( 
+    <div className="fixed  inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50  flex items-center justify-center">
+      
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md p-6">
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">Send Money</h2>
@@ -256,11 +344,12 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({
 
               <div className="flex justify-between items-center text-sm text-gray-500">
                 <span>
-                  Balance: {amount} {selectedToken}
+                  Balance: {getAmount()} {selectedToken}
                 </span>
                 <button
                   className="text-blue-500 hover:text-blue-700"
-                  onClick={() => setAmount(amount)}
+                  onClick={
+                    () => setMaxAmount()}
                 >
                   Max
                 </button>

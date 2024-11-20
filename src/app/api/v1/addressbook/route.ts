@@ -7,7 +7,7 @@ export async function POST(request: Request): Promise<Response> {
   const req = await request.json();
   const { name, address } = req;
 
-  const userAddress = headers().get("x-user-address");
+  const userAddress = ( await headers()).get("x-user-address");
 
   try {
     await dbConnect();

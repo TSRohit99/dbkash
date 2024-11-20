@@ -4,7 +4,7 @@ import { createResponse } from "@/helpers/CreateResponse";
 import { headers } from 'next/headers'
 
 export async function POST(): Promise<Response> {
-    const address = headers().get("x-user-address");
+    const address = (await headers()).get("x-user-address");
     try {
         await dbConnect();
         console.log("Connected to database, attempting to create data...");

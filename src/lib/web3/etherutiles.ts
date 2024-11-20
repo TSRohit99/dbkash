@@ -1,15 +1,21 @@
-import axios from 'axios';
+import axios from "axios";
 import { UtilFuncsResponse } from "@/types/UtilFuncsResponse";
-import { ethers } from "ethers";
+import { Contract, ethers, parseUnits } from "ethers";
 import { checkIfTheyNew } from "../checkIfTheyNew";
 import { authVerifier } from "../authVerifier";
 import { TokenInfo, TokenType } from "@/types/TokenInfo";
 import { ERC20_ABI } from "./ERC20Abi";
+import { swapContractAbi } from "./GasEfficientBDTUSDSwap";
 import { Transaction, TransactionType } from "@/types/TxnHistoryTypes";
+import { ArbiscanTx } from "@/types/ArbiscanTx";
+import { ContractResponse } from "@/types/ContractResponse";
 
 const ARBITRUM_SEPOLIA_RPC = "https://sepolia-rollup.arbitrum.io/rpc";
 const BDT_ADDRESS = "0xf327e19106F172eE87Fb65896ACfc0757069BA3A";
 const USD_ADDRESS = "0x127490E895Cc21eAC9e247eeF157021db78F9061";
+const swapContract_ADDRESS = "0xC943F3591d171c69Bc7eC77e3A20dD43Bd428F6e";
+const ARBISCAN_API_KEY = process.env.NEXT_PUBLIC_ARBISCAN_API_KEY;
+const ARBISCAN_API_URL = "https://api-sepolia.arbiscan.io/api";
 
 export const getProvider = () => {
   if (typeof window !== "undefined" && window.ethereum) {
@@ -64,12 +70,13 @@ export const connectWallet = async (): Promise<UtilFuncsResponse> => {
   }
 };
 
-
 export const switchToArbitrumSepolia = async (): Promise<UtilFuncsResponse> => {
   const provider = getProvider();
   if (provider instanceof ethers.BrowserProvider) {
     try {
-      await provider.send("wallet_switchEthereumChain", [{ chainId: "0x66eee" }]);
+      await provider.send("wallet_switchEthereumChain", [
+        { chainId: "0x66eee" },
+      ]);
       return { success: true };
     } catch (error: any) {
       if (error.code === 4902) {
@@ -107,7 +114,6 @@ export const switchToArbitrumSepolia = async (): Promise<UtilFuncsResponse> => {
     return { success: false, error: "Browser provider not available" };
   }
 };
-
 
 export const getBalances = async (
   address: string
@@ -174,7 +180,10 @@ export const sendMoney = async (
         const decimals = tokenInfo.decimals;
         const amountInSmallestUnit = ethers.parseUnits(amount, decimals);
         // const gasLimit = BigInt("50000");
-        const gasLimit = await tokenContract.transfer.estimateGas(toAddress, amountInSmallestUnit);
+        const gasLimit = await tokenContract.transfer.estimateGas(
+          toAddress,
+          amountInSmallestUnit
+        );
 
         const transaction = await tokenContract.transfer(
           toAddress,
@@ -198,38 +207,29 @@ export const sendMoney = async (
   }
 };
 
-const ARBISCAN_API_KEY = 'U9HBDK4QYE6A46UK4RWPWB6PKY1HVMRAD1'; // Replace with your actual Arbiscan API key
-const ARBISCAN_API_URL = 'https://api-sepolia.arbiscan.io/api';
-
-interface ArbiscanTx {
-  hash: string;
-  from: string;
-  to: string;
-  value: string;
-  tokenSymbol: string;
-  tokenDecimal: string;
-  timeStamp: string;
-  gasPrice: string;
-  gasUsed: string;
-}
-
-export const fetchTxns = async (address: string): Promise<UtilFuncsResponse> => {
+export const fetchTxns = async (
+  address: string
+): Promise<UtilFuncsResponse> => {
   console.log("Started fetching Arbitrum txns", address);
 
   try {
-    const response = await axios.get<{ status: string; message: string; result: ArbiscanTx[] }>(ARBISCAN_API_URL, {
+    const response = await axios.get<{
+      status: string;
+      message: string;
+      result: ArbiscanTx[];
+    }>(ARBISCAN_API_URL, {
       params: {
-        module: 'account',
-        action: 'tokentx',
+        module: "account",
+        action: "tokentx",
         address: address,
         startblock: 0,
         endblock: 99999999,
-        sort: 'desc',
-        apikey: ARBISCAN_API_KEY
-      }
+        sort: "desc",
+        apikey: ARBISCAN_API_KEY,
+      },
     });
 
-    if (response.data.status !== '1') {
+    if (response.data.status !== "1") {
       throw new Error(`Arbiscan API error: ${response.data.message}`);
     }
 
@@ -237,13 +237,14 @@ export const fetchTxns = async (address: string): Promise<UtilFuncsResponse> => 
       const date = new Date(Number(tx.timeStamp) * 1000);
       return {
         id: tx.hash,
-        type: tx.from.toLowerCase() === address.toLowerCase() ? 'send' : 'receive',
+        type:
+          tx.from.toLowerCase() === address.toLowerCase() ? "send" : "receive",
         amount: ethers.formatUnits(tx.value, parseInt(tx.tokenDecimal)),
         tokenType: tx.tokenSymbol,
         from: tx.from,
         to: tx.to,
-        date: date.toISOString().split('T')[0],
-        time: date.toTimeString().split(' ')[0],
+        date: date.toISOString().split("T")[0],
+        time: date.toTimeString().split(" ")[0],
         gasFee: ethers.formatEther(
           ethers.getBigInt(tx.gasPrice) * ethers.getBigInt(tx.gasUsed)
         ),
@@ -259,6 +260,233 @@ export const fetchTxns = async (address: string): Promise<UtilFuncsResponse> => 
     return {
       success: false,
       txns: [],
+    };
+  }
+};
+
+export const fetchFee = async (): Promise<string | null> => {
+  try {
+    const provider = getProvider();
+    const swapContract = new ethers.Contract(
+      swapContract_ADDRESS,
+      swapContractAbi,
+      provider
+    );
+    const val = await swapContract.getFeePercentage();
+    console.log("Fetched Fee", val);
+    return val.toString();
+  } catch (error) {
+    console.error("Error fetching fee", error);
+  }
+  return null;
+};
+
+// Common utilities for token operations
+async function setupTokenOperation(tokenName: string, amount: number) {
+  const provider = getProvider();
+  const signer = await provider.getSigner();
+  const signerAddress = await signer.getAddress();
+
+  // Get token contract address
+  const tokenCA = tokenName === "BDT" ? BDT_ADDRESS : USD_ADDRESS;
+
+  // Create token contract instance
+  const tokenContract = new Contract(tokenCA, ERC20_ABI, signer);
+
+  // Get token decimals and parse amount
+  const decimals = await tokenContract.decimals();
+  const parsedAmount = ethers.parseUnits(amount.toString(), decimals);
+
+  return {
+    signer,
+    signerAddress,
+    tokenCA,
+    tokenContract,
+    parsedAmount,
+  };
+}
+
+// Handle token approval
+async function handleTokenApproval(
+  tokenContract: Contract,
+  signerAddress: string,
+  parsedAmount: bigint
+) {
+  const currentAllowance = await tokenContract.allowance(
+    signerAddress,
+    swapContract_ADDRESS
+  );
+
+  const oneTimeBigAllowance = ethers.parseUnits("10000", 18);
+
+  if (currentAllowance < parsedAmount) {
+    const approveTx = await tokenContract.approve(
+      swapContract_ADDRESS,
+      oneTimeBigAllowance
+    );
+    const approvalReceipt = await approveTx.wait();
+    return approvalReceipt.hash;
+  }
+  return null;
+}
+
+// Create and execute contract transaction
+export const executeContractTransaction = async (
+  signer: any,
+  tokenCA: string,
+  parsedAmount: bigint,
+  operationType: "add" | "remove" | "swap"
+) => {
+  const liquidityContract = new Contract(
+    swapContract_ADDRESS,
+    swapContractAbi,
+    signer
+  );
+
+  // Choose function based on operation type
+  const contractFunction = {
+    add: liquidityContract.addLiquidity,
+    remove: liquidityContract.removeLiquidity,
+    swap: liquidityContract.swap,
+  }[operationType];
+
+  // Estimate gas
+  const estimatedGas = await contractFunction.estimateGas(
+    tokenCA,
+    parsedAmount
+  );
+
+  // Execute transaction
+  const tx = await contractFunction(tokenCA, parsedAmount, {
+    gasLimit: estimatedGas,
+  });
+
+  const receipt = await tx.wait();
+  return receipt.hash;
+};
+
+// Main functions for adding and removing liquidity
+export const addLiquidity = async (
+  tokenName: string,
+  amount: number
+): Promise<ContractResponse> => {
+  try {
+    // Setup basic token operation
+    const { signer, signerAddress, tokenCA, tokenContract, parsedAmount } =
+      await setupTokenOperation(tokenName, amount);
+
+    // Handle token approval if needed
+    const approvalHash = await handleTokenApproval(
+      tokenContract,
+      signerAddress,
+      parsedAmount
+    );
+
+    // Execute add liquidity transaction
+    const transactionHash = await executeContractTransaction(
+      signer,
+      tokenCA,
+      parsedAmount,
+      "add"
+    );
+
+    return {
+      success: true,
+      transactionHash,
+      approvalHash,
+      signerAddress,
+    };
+  } catch (error) {
+    console.error("Add liquidity failed:", error);
+    return {
+      success: false,
+    };
+  }
+};
+
+export const removeLiquidity = async (
+  tokenName: string,
+  amount: number
+): Promise<ContractResponse> => {
+  try {
+    // Setup basic token operation
+    const { signer, signerAddress, tokenCA, parsedAmount } =
+      await setupTokenOperation(tokenName, amount);
+
+    // Execute remove liquidity transaction
+    const transactionHash = await executeContractTransaction(
+      signer,
+      tokenCA,
+      parsedAmount,
+      "remove"
+    );
+
+    return {
+      success: true,
+      transactionHash,
+      signerAddress,
+    };
+  } catch (error) {
+    console.error("Remove liquidity failed:", error);
+    return {
+      success: false,
+    };
+  }
+};
+
+export const swap = async (
+  fromToken: string,
+  amount: number
+): Promise<ContractResponse> => {
+  try {
+    // Setup basic token operation for source token
+    const {
+      signer,
+      signerAddress,
+      tokenCA: fromTokenCA,
+      tokenContract: fromTokenContract,
+      parsedAmount,
+    } = await setupTokenOperation(fromToken, amount);
+
+    // Handle token approval if needed
+    const approvalHash = await handleTokenApproval(
+      fromTokenContract,
+      signerAddress,
+      parsedAmount
+    );
+
+    // Create swap contract instance
+    const swapContract = new Contract(
+      swapContract_ADDRESS,
+      swapContractAbi,
+      signer
+    );
+
+    // Estimate gas for swap
+    const estimatedGas = await swapContract.swap.estimateGas(
+      fromTokenCA,
+      parsedAmount
+    );
+
+    // Execute swap
+    const swapTx = await swapContract.swap(fromTokenCA, parsedAmount, {
+      gasLimit: estimatedGas,
+    });
+
+    const receipt = await swapTx.wait();
+
+    return {
+      success: true,
+      transactionHash: receipt.hash,
+      approvalHash,
+      signerAddress,
+      fromToken,
+      amount,
+    };
+  } catch (error) {
+    console.error("Token swap failed:", error);
+    return {
+      success: false,
     };
   }
 };

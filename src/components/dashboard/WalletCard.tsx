@@ -23,6 +23,7 @@ import SettingsModal from "./Settings";
 import axios from "axios";
 import { checkIfTheyNew } from "@/lib/checkIfTheyNew";
 import getTokenPriceInUSD from "@/helpers/getPriceInUsd";
+import SwapInterface from "./Swap";
 
 const addressTrimmer = (address: string | null) => {
   return address ? (`${address.slice(0, 4)}...${address.slice(-3)}`).toLowerCase() : null;
@@ -31,15 +32,14 @@ const addressTrimmer = (address: string | null) => {
 
 const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
   const router = useRouter();
-  const { address, disconnect } = useWallet();
+  const { address, disconnect, walletBalance, usdPrice } = useWallet();
   const [trimmedWalletAddress, setTrimmedWalletAddress] = useState<string | null>(null);
-  const [walletBalance, setWalletBalance] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('');
   const [userEmail, setUserEmail] = useState<string>('');
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
   const [isSMModalOpen, setIsSMModalOpen] = useState(false);
-  const [isSTModalOpen, setIsSTModalOpenn] = useState(false);
-  const usdPrice = 118; // hardcoded for now.
+  const [isSTModalOpen, setIsSTModalOpen] = useState(false);
+  const [isSwapModalOPen, setIsSwapModalOpen] = useState(false);
 
 
 
@@ -47,7 +47,6 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
     if (address) {
       setTrimmedWalletAddress(addressTrimmer(address));
       getInfo();
-      fetchBalance();
     }
   }, [address]);
 
@@ -87,20 +86,7 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
     }
   };
 
-  const fetchBalance = async () => {
-    if (address) {
-      try {
-        const balanceValue: any = await getBalances(address);
-        const res = await getTokenPriceInUSD("ethereum");
-        const ethToBDT = parseFloat(balanceValue?.ETH)*res.price*usdPrice;
-        const totalBal = (parseFloat(balanceValue?.BDT) + parseFloat(balanceValue?.USD)*usdPrice + ethToBDT );
-        setWalletBalance(totalBal.toFixed(2));
-      } catch (error) {
-        console.error("Error Fetching Balance : ", error);
-      }
-      
-    }
-  };
+
 
 
   const handleDisconnect = () => {
@@ -112,7 +98,7 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
   };
 
   const handleSettings = ()=> {
-    setIsSTModalOpenn(true)
+    setIsSTModalOpen(true)
   }
 
   return (
@@ -171,6 +157,9 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
           </button>
 
           <button
+          onClick={()=>{
+            setIsSwapModalOpen(true);
+          }}
             className="bg-white hover:bg-blue-100 transition duration-300 hover:p-2 w-1/4 text-blue-500 rounded-lg p-3 flex flex-col items-center"
           >
             <FiRefreshCw />
@@ -181,7 +170,7 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
 
       <WalletQR address={address} isOpen={isQrModalOpen} onClose={() => setIsQrModalOpen(false)} />
       <SettingsModal isOpen={isSTModalOpen} 
-      onClose={() => setIsSTModalOpenn(false)}
+      onClose={() => setIsSTModalOpen(false)}
       username={userName}
       setUsername={setUserName}
       userEmail ={userEmail}
@@ -191,6 +180,11 @@ const WalletInterface: React.FC<WalletCardProps> = ({scannedAddress}) => {
         isOpen={isSMModalOpen} 
         onClose={()=>setIsSMModalOpen(false)} 
         scannedAddress={scannedAddress}
+        />
+
+      <SwapInterface 
+        isOpen={isSwapModalOPen} 
+        onClose={()=>setIsSwapModalOpen(false)} 
         />
     </>
   );

@@ -8,7 +8,7 @@ import { headers } from "next/headers";
 export async function POST(request: Request): Promise<Response> {
     const req = await request.json();
     const {email, name } = req;
-    const address = headers().get("x-user-address");
+    const address = (await headers()).get("x-user-address");
     
     try {
         await dbConnect();

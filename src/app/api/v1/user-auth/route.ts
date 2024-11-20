@@ -22,9 +22,9 @@ export async function POST(request: Request): Promise<Response> {
             const token = jwt.sign({
                 address,
             }, process.env.JWT_SECRET, { expiresIn: '1d' });
-            console.log(token)
+            console.log(token);
 
-            cookies().set('jwt', token, {
+           (await cookies()).set('jwt', token, {
                 httpOnly: true,
                 secure: process.env.NODE_ENV !== 'development',
                 sameSite: 'strict',

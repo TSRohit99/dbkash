@@ -5,6 +5,7 @@ import { FaRegAddressBook } from "react-icons/fa";
 import { FaMoneyBillTrendUp } from "react-icons/fa6";
 import { LuUtilityPole } from "react-icons/lu";
 import AddressBookComponent from "./AddressBook";
+import ArbiWinzLogo from "./ArbiWinzLogo";
 
 
 
@@ -12,7 +13,12 @@ const FeatureButtons: React.FC = () => {
   const features = [
     { icon: <FaMoneyBillTrendUp />, label: "Stake", color: "bg-green-500", hover: "hover:bg-green-600" },
     { icon: <FaRegAddressBook />, label: "Address Book", color: "bg-purple-500", hover: "hover:bg-purple-600" },
-    { icon: <LuUtilityPole  />, label: "Pay Utility", color: "bg-red-500", hover: "hover:bg-red-600" },
+    { 
+      icon: <ArbiWinzLogo />, 
+      label: "Play Lottery", 
+      color: "bg-blue-900", 
+      hover: "hover:from-indigo-700 hover:via-blue-600 hover:to-cyan-600" 
+  },
   ];
   const [isABModalOpen, setIsABModalOpen] = useState(false);
 
@@ -33,7 +39,7 @@ const FeatureButtons: React.FC = () => {
          }
          }
           key={index}
-          className={`${feature.color} ${feature.hover} text-white rounded-full p-3 flex flex-col items-center w-1/3 md:w-1/5`      
+          className={`${feature.color} ${feature.hover} text-white rounded-full p-3 flex flex-col items-center w-1/3 md:w-1/5 border`      
         }
         >
           {feature.icon}

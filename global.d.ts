@@ -4,6 +4,7 @@ declare namespace NodeJS {
       MONGO_URI: string;
       RESEND_API_KEY:string;
       JWT_SECRET:string;
+      NEXT_PUBLIC_ARBISCAN_API_KEY:string;
       NODE_ENV: 'development' | 'production' | 'test';
     }
   }
