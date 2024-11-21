@@ -31,7 +31,7 @@ const addressTrimmer = (address: string | null) => {
     : null;
 };
 
-const WalletInterface: React.FC<WalletCardProps> = ({ scannedAddress }) => {
+const WalletInterface: React.FC<WalletCardProps> = ({ scannedAddress ,  handleAddressScanned}) => {
   const router = useRouter();
   const { address, disconnect, walletBalance, usdPrice } = useWallet();
   const [trimmedWalletAddress, setTrimmedWalletAddress] = useState<
@@ -192,6 +192,7 @@ const WalletInterface: React.FC<WalletCardProps> = ({ scannedAddress }) => {
         isOpen={isSMModalOpen}
         onClose={() => setIsSMModalOpen(false)}
         scannedAddress={scannedAddress}
+        handleAddressScanned = {handleAddressScanned}
       />
 
       <SwapInterface

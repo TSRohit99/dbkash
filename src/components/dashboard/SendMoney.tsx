@@ -24,12 +24,14 @@ const trimAddress = (address: string) => {
 
 interface SendMoneyProps extends WalletCardProps, ModalProps {
   scannedAddress?: string;
+  handleAddressScanned: (address : string)=> void;
 }
 
 const SendMoneyComponent: React.FC<SendMoneyProps> = ({
   isOpen,
   onClose,
   scannedAddress,
+  handleAddressScanned,
 }) => {
 
   const { address,usdPrice, setBdtBal, walletBalance, setEthBal,setUsdBal,setWalletBalance,bdtBal, usdBal,ethBal } = useWallet();
@@ -206,6 +208,7 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({
   const handleClose = () => {
     setRecipient("");
     setAmount("");
+    handleAddressScanned("");
     setSearchResults([]);
     setSelectedAddress("");
     setShowConfirmation(false);
@@ -250,7 +253,8 @@ const SendMoneyComponent: React.FC<SendMoneyProps> = ({
         <div className="flex justify-between items-center mb-6">
           <h2 className="text-2xl font-bold text-gray-800">Send Money</h2>
           <button
-            onClick={handleClose}
+            onClick={
+              () => handleClose()}
             className="text-gray-500 hover:text-gray-700"
           >
             <FiX size={24} />

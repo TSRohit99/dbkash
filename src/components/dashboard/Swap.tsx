@@ -118,7 +118,7 @@ const SwapInterface: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
           setUsdBal((prev: string | null) => {
             if (prev) {
-              return (parseFloat(prev) + parseFloat(receiveAmount)).toString();
+              return (parseFloat(prev) + parseFloat(estimatedAmountUSD)).toString();
             }
             return usdBal;
           });
@@ -132,7 +132,7 @@ const SwapInterface: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
           setBdtBal((prev: string | null) => {
             if (prev) {
-              return (parseFloat(prev) + parseFloat(receiveAmount)).toString();
+              return (parseFloat(prev) + parseFloat(estimatedAmountBDT)).toString();
             }
             return bdtBal;
           });

@@ -2,6 +2,7 @@ import React from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
@@ -48,6 +49,9 @@ const TransactionHistoryModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           <DialogTitle className="text-xl sm:text-2xl font-bold text-blue-500">
             Transaction History
           </DialogTitle>
+          <DialogDescription className="text-gray-500">
+        {null}
+      </DialogDescription>
         </DialogHeader>
         
         <ScrollArea className="h-[60vh] sm:h-[70vh] px-4 sm:px-6 py-4">

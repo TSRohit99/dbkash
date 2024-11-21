@@ -37,7 +37,6 @@ const QRScanner: React.FC<QRScannerProps> = ({ isOpen, onClose, handleAddressSca
       <button
         onClick={()=>{
           onClose();
-          window.location.reload();
         }}
         className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 transition duration-300"
       >
@@ -46,11 +45,11 @@ const QRScanner: React.FC<QRScannerProps> = ({ isOpen, onClose, handleAddressSca
       <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Scan QR Code</h2>
       <div className="relative h-64 md:h-96 w-full">
         <Scanner
-        
+        components={ {audio : false} }        
           onScan={(result) => {
             handleDecode(result);
           }}
-          constraints={{ facingMode: 'environment' }}
+          constraints={{ facingMode: 'environment',  noiseSuppression: true }}
         />
       </div>
       <p className="text-gray-600 text-center mt-4 text-sm">

@@ -26,7 +26,7 @@ export default function Dashboard() {
     <>
       {!isWalletModalOpen ? (
         <div className="px-2 mt-3">
-          <WalletInterface scannedAddress={scannedAddress}/>
+          <WalletInterface scannedAddress={scannedAddress} handleAddressScanned ={handleAddressScanned}/>
           <TokensList />
           <FeatureButtons />
           <div className="p-10"></div>
