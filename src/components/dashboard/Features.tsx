@@ -3,9 +3,9 @@
 import React, { useState } from "react";
 import { FaRegAddressBook } from "react-icons/fa";
 import { FaMoneyBillTrendUp } from "react-icons/fa6";
-import { LuUtilityPole } from "react-icons/lu";
 import AddressBookComponent from "./AddressBook";
 import ArbiWinzLogo from "./ArbiWinzLogo";
+import StakeModal from "./Stake";
 
 const FeatureButtons: React.FC = () => {
   const features = [
@@ -21,8 +21,14 @@ const FeatureButtons: React.FC = () => {
   
   const [isABModalOpen, setIsABModalOpen] = useState(false);
 
+  const [isStakeModalOpen, setIsStakeModalOpen] = useState(false);
+
   const handleAddressBook = () => {
     setIsABModalOpen(true);
+  };
+
+  const handleStake = () => {
+    setIsStakeModalOpen(true);
   };
 
   const handlePlayLottery = () => {
@@ -42,6 +48,9 @@ const FeatureButtons: React.FC = () => {
               if (feature.label === "Play Lottery") {
                 handlePlayLottery();
               }
+              if (feature.label ===  "Stake") {
+                handleStake();
+              }
             }}
             key={index}
             className={`${feature.color} ${feature.hover} text-white rounded-full p-3 flex flex-col items-center w-1/3 md:w-1/5 border`}
@@ -52,6 +61,7 @@ const FeatureButtons: React.FC = () => {
         ))}
       </div>
       <AddressBookComponent isOpen={isABModalOpen} onClose={() => setIsABModalOpen(false)} />
+      <StakeModal isOpen={isStakeModalOpen} onClose={() => setIsStakeModalOpen(false)} />
     </>
   );
 };

@@ -7,30 +7,43 @@ import TokensList from "@/components/dashboard/Tokens";
 import WalletInterface from "@/components/dashboard/WalletCard";
 import { useWallet } from "@/context/WalletProvider";
 import { useEffect, useState } from "react";
+import LoadingPage from "../loading";
 
 export default function Dashboard() {
   const { address } = useWallet();
-  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
-  const [scannedAddress, setScannedAddress] = useState('');
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState<boolean | null>(null); // Start with `null` to signify "loading"
+  const [scannedAddress, setScannedAddress] = useState("");
+
   const handleAddressScanned = (address: string) => {
     setScannedAddress(address);
   };
 
   useEffect(() => {
-    if (address === null || address === undefined) {
-      setIsWalletModalOpen(true);
+    // Delay rendering until the address check is complete
+    if (address === undefined) {
+      setIsWalletModalOpen(null); // Still loading
+    } else {
+      setIsWalletModalOpen(!address); // Open modal if no address is found
     }
   }, [address]);
+
+  if (isWalletModalOpen === null) {
+    // Show a loading state until we determine whether the modal should open
+    return <LoadingPage />;
+  }
 
   return (
     <>
       {!isWalletModalOpen ? (
         <div className="px-2 mt-3">
-          <WalletInterface scannedAddress={scannedAddress} handleAddressScanned ={handleAddressScanned}/>
+          <WalletInterface
+            scannedAddress={scannedAddress}
+            handleAddressScanned={handleAddressScanned}
+          />
           <TokensList />
           <FeatureButtons />
           <div className="p-10"></div>
-          <BottomNav handleAddressScanned={handleAddressScanned}/>
+          <BottomNav handleAddressScanned={handleAddressScanned} />
         </div>
       ) : (
         <ConnectMetamask

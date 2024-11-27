@@ -39,9 +39,10 @@ const ConnectMetamask: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   };
 
   const handleCross = ()=> {
+    setIsLoading(true);
     onClose();   
     if(window.location.pathname !== '/')
-      router.push('/')
+      router.replace('/')
 
   }
   return (
@@ -50,7 +51,7 @@ const ConnectMetamask: React.FC<ModalProps> = ({ isOpen, onClose }) => {
       <div className="bg-white rounded-2xl shadow-2xl p-8 max-w-md w-full relative">
         <button
           onClick={
-            handleCross              
+            () => handleCross()              
             }
 
          

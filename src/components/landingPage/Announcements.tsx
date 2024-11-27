@@ -48,15 +48,15 @@ const Announcements : React.FC = () => {
   return (
     <div className="max-w-6xl mx-4 md:mx-auto">
       <div className='text-3xl md:text-4xl text-center text-white font-extrabold mb-5 '>Announcments</div>
-      <div className="relative overflow-hidden rounded-3xl">
-        <div className="flex items-center justify-center">
+      <div className="relative overflow-hidden ">
+        <div className="flex items-center justify-center ">
           <div className=''>
             <Image 
               src={announcements[currentIndex].image}
               alt={announcements[currentIndex].title}
               priority={true}
-              width={900}
-              height={500}
+              width={700}
+              height={250}
               className="object-cover"
             />
           </div>

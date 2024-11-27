@@ -4,7 +4,6 @@ import { ArrowDownCircle, X } from "lucide-react";
 import { ModalProps } from "@/types/ModalProps";
 import { swap } from "@/lib/web3/etherutiles";
 import { useWallet } from "@/context/WalletProvider";
-import { ContractResponse } from "@/types/ContractResponse";
 import toast from "react-hot-toast";
 
 const SwapInterface: React.FC<ModalProps> = ({ isOpen, onClose }) => {
@@ -18,146 +17,104 @@ const SwapInterface: React.FC<ModalProps> = ({ isOpen, onClose }) => {
     setUsdBal,
     setWalletBalance,
   } = useWallet();
-  const [isBDT, setIsBDT] = useState(true);
+
+  const [isBDT, setIsBDT] = useState(true); // Direction: true = BDT -> USD, false = USD -> BDT
   const [payAmount, setPayAmount] = useState("0");
   const [receiveAmount, setReceiveAmount] = useState("0");
-  const [estimatedAmountUSD, setEstimatedAmountUSD] = useState("0");
-  const [estimatedAmountBDT, setEstimatedAmountBDT] = useState("0");
+
   const swapFeeP = swapFee ? parseFloat(swapFee) / 100 : 0.02;
 
-  const calculateConversion = (amount: string, fromBDT: boolean) => {
-    if (amount === "" || amount === "0") {
-      return {
-        receiveAmount: "0",
-        estimatedAmount: "0",
-      };
-    }
-
+  /** Calculate receive amount based on pay amount */
+  const calculateReceiveAmount = (amount: string, fromBDT: boolean): string => {
     const numAmount = parseFloat(amount);
-    let receivedVal: number;
-    let estimatedVal: number;
+    if (isNaN(numAmount) || numAmount <= 0) return "0";
 
-    if (fromBDT) {
-      // Converting from BDT to USD
-      receivedVal = numAmount / usdPrice;
-      estimatedVal = receivedVal - receivedVal * swapFeeP; // 2% fee
-      return {
-        receiveAmount: receivedVal.toString(),
-        estimatedAmount: estimatedVal.toString(),
-      };
-    } else {
-      // Converting from USD to BDT
-      receivedVal = numAmount * usdPrice;
-      estimatedVal = receivedVal - receivedVal * swapFeeP; // 2% fee
-      return {
-        receiveAmount: receivedVal.toString(),
-        estimatedAmount: estimatedVal.toString(),
-      };
-    }
+    const converted = fromBDT ? numAmount / usdPrice : numAmount * usdPrice;
+    const afterFee = converted * (1 - swapFeeP); // Apply swap fee
+    return afterFee.toFixed(2); // Round to 2 decimals
   };
 
-  const handleConv = (amount: string) => {
+  /** Handle input changes for pay amount */
+  const handlePayAmountChange = (amount: string) => {
     setPayAmount(amount);
-    const { receiveAmount: convertedAmount, estimatedAmount } =
-      calculateConversion(amount, isBDT);
-    setReceiveAmount(convertedAmount);
+    const converted = calculateReceiveAmount(amount, isBDT);
+    setReceiveAmount(converted);
+  };
 
-    if (isBDT) {
-      setEstimatedAmountBDT(estimatedAmount);
-    } else {
-      setEstimatedAmountUSD(estimatedAmount);
+  /** Swap direction (BDT <-> USD) */
+  const handleSwapDirection = () => {
+    setIsBDT((prev) => !prev);
+    const converted = calculateReceiveAmount(payAmount, !isBDT);
+    setReceiveAmount(converted);
+  };
+
+  /** Execute the swap */
+  const handleSwap = async () => {
+    const fromToken = isBDT ? "BDT" : "USD";
+    const toToken = isBDT ? "USD" : "BDT";
+    const amount = parseFloat(payAmount);
+    const receivedAmount = parseFloat(receiveAmount);
+
+    if (
+      isNaN(amount) ||
+      amount <= 0 ||
+      isNaN(receivedAmount) ||
+      receivedAmount <= 0
+    ) {
+      toast.error("Invalid amount. Please enter a valid value.");
+      return;
+    }
+
+    const toastId = toast.loading("Processing swap...", {
+      duration: 40000,
+    });
+
+    try {
+      const result = await swap(fromToken, amount);
+      if (result.success) {
+        // Update balances
+        if (isBDT) {
+          setBdtBal((prev) => (parseFloat(prev || "0") - amount).toFixed(2));
+          setUsdBal((prev) =>
+            (parseFloat(prev || "0") + receivedAmount).toFixed(2)
+          );
+        } else {
+          setUsdBal((prev) => (parseFloat(prev || "0") - amount).toFixed(2));
+          setBdtBal((prev) =>
+            (parseFloat(prev || "0") + receivedAmount).toFixed(2)
+          );
+        }
+        setWalletBalance((prev) =>
+          (
+            parseFloat(prev || "0") -
+            (isBDT ? amount * swapFeeP : amount * usdPrice * swapFeeP)
+          ).toFixed(3)
+        );
+
+        toast.dismiss(toastId);
+        toast.success(
+          `Successfully swapped ${amount} ${fromToken} for ${receivedAmount} ${toToken}`
+        );
+        onClose();
+        clearInputs();
+      } else {
+        toast.error("Swap failed. Please try again.");
+      }
+    } catch (error) {
+      toast.dismiss(toastId);
+      console.error("Swap error:", error);
+      toast.error("An error occurred during the swap.");
     }
   };
 
-  const handleArrowSwap = () => {
-    setIsBDT(!isBDT);
-    // When swapping, we need to recalculate based on the new currency direction
-    const { receiveAmount: convertedAmount, estimatedAmount } =
-      calculateConversion(payAmount, !isBDT);
-    setReceiveAmount(convertedAmount);
-
-    if (!isBDT) {
-      // Note: we use !isBDT because the state hasn't updated yet
-      setEstimatedAmountBDT(estimatedAmount);
-    } else {
-      setEstimatedAmountUSD(estimatedAmount);
-    }
-  };
-
-  const clearModal = () => {
-    setEstimatedAmountBDT("0");
-    setEstimatedAmountUSD("0");
+  /** Clear input fields */
+  const clearInputs = () => {
     setPayAmount("0");
     setReceiveAmount("0");
   };
 
-  const handleSwap = async () => {
-    const token = isBDT ? "BDT" : "USD";
-    const toastId = toast.loading("Executing the transaction...", {
-      duration: 600000,
-    });
-
-    try {
-      const amount = parseFloat(payAmount);
-      const val: ContractResponse = await swap(token,amount );
-      const conf = `You have succesfully swapped ${amount} ${token} for ${receiveAmount} ${token == "BDT" ? "USD" : "BDT"}`
-      if (val.success) {
-        toast.dismiss(toastId);
-        onClose();
-        toast.success(conf, {
-          duration: 5000,
-        });
-
-        if (token == "BDT") {
-          setBdtBal((prev: string | null) => {
-            if (prev) {
-              return (parseFloat(prev) - parseFloat(payAmount)).toString();
-            }
-            return bdtBal;
-          });
-
-          setUsdBal((prev: string | null) => {
-            if (prev) {
-              return (parseFloat(prev) + parseFloat(estimatedAmountUSD)).toString();
-            }
-            return usdBal;
-          });
-        } else {
-          setUsdBal((prev: string | null) => {
-            if (prev) {
-              return (parseFloat(prev) - parseFloat(payAmount)).toString();
-            }
-            return usdBal;
-          });
-
-          setBdtBal((prev: string | null) => {
-            if (prev) {
-              return (parseFloat(prev) + parseFloat(estimatedAmountBDT)).toString();
-            }
-            return bdtBal;
-          });
-        }
-
-        setWalletBalance((prev: string | null) => {
-          if (prev) {
-            return (
-              parseFloat(prev) -
-              parseFloat(receiveAmount) * swapFeeP
-            ).toString();
-          }
-          return walletBalance;
-        });
-
-        clearModal();
-      } else {
-        toast.dismiss(toastId);
-        toast.error("Swapping Failed!", {
-          duration: 3000,
-        });
-      }
-    } catch (error) {
-      console.error("Error in swap :", error);
-    }
+  const getMaxBalance = () => {
+    return isBDT ? bdtBal : usdBal;
   };
 
   if (!isOpen) return null;
@@ -180,7 +137,7 @@ const SwapInterface: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             <input
               type="number"
               value={payAmount}
-              onChange={(e) => handleConv(e.target.value)}
+              onChange={(e) => handlePayAmountChange(e.target.value)}
               className="bg-transparent text-2xl font-semibold outline-none w-1/2"
             />
             <div className="flex items-center gap-2 bg-white px-3 py-2 rounded-lg border border-gray-200">
@@ -194,12 +151,17 @@ const SwapInterface: React.FC<ModalProps> = ({ isOpen, onClose }) => {
               <span className="font-medium">{isBDT ? "BDT" : "USD"}</span>
             </div>
           </div>
-          <div className="text-sm text-gray-400 pl-2">~{payAmount}</div>
+          <div className="flex flex-row  text-sm text-gray-600 mb-2">
+            <span>
+              Max: {Number(getMaxBalance() ?? "0").toFixed(2)}{" "}
+              {isBDT ? "BDT" : "USD"}
+            </span>
+          </div>
         </div>
 
         <div className="flex justify-center -my-2">
           <button
-            onClick={handleArrowSwap}
+            onClick={handleSwapDirection}
             className="transform transition-transform hover:scale-110"
           >
             <ArrowDownCircle className="w-8 h-8 text-blue-600 bg-white rounded-full" />
@@ -230,16 +192,14 @@ const SwapInterface: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
         <div className="mt-4 text-sm text-gray-600 flex items-center gap-1">
           You Get (incl. fees)
-          <span className="font-medium text-gray-900">
-            {isBDT ? estimatedAmountBDT : estimatedAmountUSD}
-          </span>
+          <span className="font-medium text-gray-900">{receiveAmount}</span>
           <span className="font-medium text-gray-900">
             {!isBDT ? "BDT" : "USD"}
           </span>
         </div>
 
         <button
-          onClick={handleSwap}
+          onClick={async () => await handleSwap()}
           className="w-full bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-4 mt-6 font-medium transition-colors"
         >
           Swap

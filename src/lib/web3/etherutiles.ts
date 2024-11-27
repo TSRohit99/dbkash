@@ -6,9 +6,9 @@ import { authVerifier } from "../authVerifier";
 import { TokenInfo, TokenType } from "@/types/TokenInfo";
 import { ERC20_ABI } from "./ERC20Abi";
 import { swapContractAbi } from "./GasEfficientBDTUSDSwap";
-import { Transaction, TransactionType } from "@/types/TxnHistoryTypes";
 import { ArbiscanTx } from "@/types/ArbiscanTx";
 import { ContractResponse } from "@/types/ContractResponse";
+import { stakeData } from "@/types/StakeData";
 
 const ARBITRUM_SEPOLIA_RPC = "https://sepolia-rollup.arbitrum.io/rpc";
 const BDT_ADDRESS = "0xf327e19106F172eE87Fb65896ACfc0757069BA3A";
@@ -223,7 +223,7 @@ export const fetchTxns = async (
         action: "tokentx",
         address: address,
         startblock: 0,
-        endblock: 99999999,
+        endblock: 'latest',
         sort: "desc",
         apikey: ARBISCAN_API_KEY,
       },
@@ -279,6 +279,110 @@ export const fetchFee = async (): Promise<string | null> => {
     console.error("Error fetching fee", error);
   }
   return null;
+};
+
+export const fetchStakingData = async (address: string): Promise<stakeData> => {
+  try {
+    const provider = getProvider();
+    const swapContract = new ethers.Contract(
+      swapContract_ADDRESS,
+      swapContractAbi,
+      provider
+    );
+
+    const valBDT = await swapContract.getLiquidityBalance(address, BDT_ADDRESS);
+    const valUSD = await swapContract.getLiquidityBalance(address, USD_ADDRESS);
+
+    console.log("Fetched lp", valBDT, valUSD);
+    return {
+      usd: parseFloat(ethers.formatUnits(valUSD, 18)),
+      bdt: parseFloat(ethers.formatUnits(valBDT, 18)),
+    };
+  } catch (error) {
+    console.error("Error fetching fee", error);
+    return {
+      usd: 0,
+      bdt: 0,
+    };
+  }
+};
+
+export const fetchAddressRewards = async (targetAddress: string): Promise<stakeData> => {
+  let bdtReward = 0;
+  let usdReward = 0;
+
+  try {
+    const provider = getProvider();
+    const swapContract = new ethers.Contract(
+      swapContract_ADDRESS,
+      swapContractAbi,
+      provider
+    );
+
+    const filter = swapContract.filters.RewardsDistributed();
+    const events = await swapContract.queryFilter(filter);
+
+    const bdtContract = new ethers.Contract(
+      BDT_ADDRESS,
+      ["event Transfer(address indexed from, address indexed to, uint256 value)"],
+      provider
+    );
+
+    const usdContract = new ethers.Contract(
+      USD_ADDRESS,
+      ["event Transfer(address indexed from, address indexed to, uint256 value)"],
+      provider
+    );
+
+    const normalizedAddress = targetAddress.toLowerCase();
+
+    for (const event of events) {
+      const receipt = await provider.getTransactionReceipt(event.transactionHash);
+      if (!receipt) continue;
+
+      const bdtTransfers = receipt.logs
+        .filter(
+          (log) =>
+            log.address.toLowerCase() === BDT_ADDRESS.toLowerCase() &&
+            bdtContract.interface.parseLog(log)
+        )
+        .map((log) => {
+          const parsedLog = bdtContract.interface.parseLog(log);
+          if (parsedLog) {
+            const to = parsedLog.args[1].toLowerCase();
+            return to === normalizedAddress 
+              ? parseFloat(ethers.formatUnits(parsedLog.args[2].toString(), 18))
+              : 0;
+          }
+          return 0;
+        });
+
+      const usdTransfers = receipt.logs
+        .filter(
+          (log) =>
+            log.address.toLowerCase() === USD_ADDRESS.toLowerCase() &&
+            usdContract.interface.parseLog(log)
+        )
+        .map((log) => {
+          const parsedLog = usdContract.interface.parseLog(log);
+          if (parsedLog) {
+            const to = parsedLog.args[1].toLowerCase();
+            return to === normalizedAddress
+              ? parseFloat(ethers.formatUnits(parsedLog.args[2].toString(), 18))
+              : 0;
+          }
+          return 0;
+        });
+
+      bdtReward += bdtTransfers.reduce((a, b) => a + b, 0);
+      usdReward += usdTransfers.reduce((a, b) => a + b, 0);
+    }
+
+    return { usd: usdReward, bdt: bdtReward };
+  } catch (error) {
+    console.error("Error fetching address rewards", error);
+    return { usd: 0, bdt: 0 };
+  }
 };
 
 // Common utilities for token operations

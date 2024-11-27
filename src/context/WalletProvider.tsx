@@ -143,6 +143,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         console.error("Error fetching balance:", error);
       });
 
+      fetchTransactions(address).catch((error) => {
+        console.error("Error fetching txns:", error);
+      })
+
       fetchSwapFee().catch((error) => {
         console.error("Error fetching SwapFee:", error);
       });

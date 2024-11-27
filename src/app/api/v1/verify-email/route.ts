@@ -1,7 +1,7 @@
 // pages/api/verify-email.ts
 
 import dbConnect from "@/lib/db/dbConnect";
-import userModel from "@/app/models/user";
+import userModel from "../../../../models/user";
 import { createResponse } from "@/helpers/CreateResponse";
 import bcrypt from 'bcrypt'
 import { headers } from "next/headers";
