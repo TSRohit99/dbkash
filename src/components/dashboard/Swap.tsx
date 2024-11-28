@@ -129,7 +129,7 @@ const SwapInterface: React.FC<ModalProps> = ({ isOpen, onClose }) => {
           <X className="w-5 h-5 text-gray-400 hover:text-gray-600" />
         </button>
 
-        <div className="text-xl font-semibold text-blue-600 mb-6">Swap</div>
+        <div className="text-xl font-extrabold text-blue-600 mb-6">Swap</div>
 
         <div className="space-y-2 mb-2">
           <div className="text-sm text-gray-600">Pay</div>

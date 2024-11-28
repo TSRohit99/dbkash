@@ -50,52 +50,53 @@ const TransactionHistoryModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
             Transaction History
           </DialogTitle>
           <DialogDescription className="text-gray-500">
-        {null}
-      </DialogDescription>
+            {null}
+          </DialogDescription>
         </DialogHeader>
-        
+
         <ScrollArea className="h-[60vh] sm:h-[70vh] px-4 sm:px-6 py-4">
           <div className="space-y-3 sm:space-y-4">
-            {transactions && transactions.map((transaction, index) => (
-              <Link
-                href={`https://sepolia.arbiscan.io/tx/${transaction.id}`}
-                key={index}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex flex-col space-y-2 p-3 sm:p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
-              >
-                <div className="flex items-start sm:items-center">
-                  <div className="mr-3 sm:mr-4 mt-1 sm:mt-0">
-                    {getIcon(transaction.type)}
-                  </div>
-                  
-                  <div className="flex-grow min-w-0">
-                    <p className="font-semibold text-blue-500 hover:text-blue-700 text-sm sm:text-base truncate">
-                      {formatAddress(getTransactionParty(transaction))}
-                    </p>
-                    <p className="text-xs sm:text-sm text-gray-500">
-                      {transaction.date} at {transaction.time}
-                    </p>
-                  </div>
-                  
-                  <div
-                    className={`text-sm sm:text-base font-bold -ml-1 text-right ${
-                      transaction.type === "receive" ||
-                      transaction.type === "pay"
-                        ? "text-green-500"
-                        : "text-red-500"
-                    }`}
-                  >
-                    {`${transaction.amount} ${transaction.tokenType}`}
-                  </div>
-                </div>
+            {transactions &&
+              transactions.map((transaction, index) => (
+                <Link
+                  href={`https://sepolia.arbiscan.io/tx/${transaction.id}`}
+                  key={index}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex flex-col space-y-2 p-3 sm:p-4 bg-gray-50 rounded-lg shadow-sm hover:shadow-md transition-shadow duration-200"
+                >
+                  <div className="flex items-start sm:items-center">
+                    <div className="mr-3 sm:mr-4 mt-1 sm:mt-0">
+                      {getIcon(transaction.type)}
+                    </div>
 
-                {/* Gas Fee Section */}
-                <div className="text-[10px] sm:text-xs text-gray-500">
-                  Gas Fee: {transaction.gasFee} ETH
-                </div>
-              </Link>
-            ))}
+                    <div className="flex-grow min-w-0">
+                      <p className="font-semibold text-blue-500 hover:text-blue-700 text-sm sm:text-base truncate">
+                        {formatAddress(getTransactionParty(transaction))}
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-500">
+                        {transaction.date} at {transaction.time}
+                      </p>
+                    </div>
+
+                    <div
+                      className={`text-sm sm:text-base font-bold -ml-1 text-right ${
+                        transaction.type === "receive" ||
+                        transaction.type === "pay"
+                          ? "text-green-500"
+                          : "text-red-500"
+                      }`}
+                    >
+                      {`${transaction.amount} ${transaction.tokenType}`}
+                    </div>
+                  </div>
+
+                  {/* Gas Fee Section */}
+                  <div className="text-[10px] sm:text-xs text-gray-500">
+                    Gas Fee: {transaction.gasFee} ETH
+                  </div>
+                </Link>
+              ))}
           </div>
         </ScrollArea>
       </DialogContent>

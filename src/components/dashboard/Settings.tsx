@@ -67,11 +67,10 @@ const SettingsModal: React.FC<SettingsProps> = ({
         setIsVerifying(true);
       } else {
         toast.error(data.message || "Failed to send verification email.");
-       
       }
     } catch (error: any) {
       console.error("Error sending verification email:", error);
-      setIsVloading(false)
+      setIsVloading(false);
       toast.error(
         (await error.response.data.message) ||
           "An error occurred. Please try again."
@@ -138,7 +137,7 @@ const SettingsModal: React.FC<SettingsProps> = ({
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold">Settings</h2>
+            <h2 className="text-2xl font-extrabold text-blue-600">Settings</h2>
             <button
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700 focus:outline-none"
@@ -229,7 +228,7 @@ const SettingsModal: React.FC<SettingsProps> = ({
                 className="w-full px-4 py-2 bg-green-500 text-white rounded-md hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500"
                 disabled={isSloading}
               >
-                  {isSloading ? "Verifying..." : "Submit Code"}
+                {isSloading ? "Verifying..." : "Submit Code"}
               </button>
             </div>
           )}

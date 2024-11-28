@@ -1,23 +1,22 @@
-"use client"
+"use client";
 
-import Link from 'next/link'
-import React, { useState, useEffect } from 'react'
-import { FaBars, FaTimes } from 'react-icons/fa'
-import QuickOverviewModal from './QuickOverviewModal'
-import ConnectMetamask from '../dashboard/ConnectWallet'
+import Link from "next/link";
+import React, { useState, useEffect } from "react";
+import { FaBars, FaTimes } from "react-icons/fa";
+import QuickOverviewModal from "./QuickOverviewModal";
+import ConnectMetamask from "../dashboard/ConnectWallet";
 
 const navItems = [
-  { name: 'Swap', href: '#' },
-  { name: 'Stake', href: '#' },
-  { name: 'FAQ', href: '#faq' },
-  { name: 'About', href: '#about' },
+  { name: "Swap", href: "#" },
+  { name: "Stake", href: "#" },
+  { name: "FAQ", href: "#faq" },
+  { name: "About", href: "#about" },
+];
 
-]
-
-const Navbar : React.FC =()=> {
-  const [isOpen, setIsOpen] = useState(false)
-  const [isModalOpen, setIsModalOpen] = useState(false)
-  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false)
+const Navbar: React.FC = () => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [show, setShow] = useState(true);
   const [scrollPos, setScrollPos] = useState(0);
 
@@ -32,19 +31,19 @@ const Navbar : React.FC =()=> {
   };
 
   useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
     return () => {
-      window.removeEventListener('scroll', handleScroll);
+      window.removeEventListener("scroll", handleScroll);
     };
   }, [scrollPos]);
 
   return (
     <nav
       className={`fixed w-full z-20 py-4 text-[1.1rem] transition-transform duration-300 ${
-        show ? 'transform translate-y-0' : 'transform -translate-y-full'
+        show ? "transform translate-y-0" : "transform -translate-y-full"
       } bg-customBlue shadow-md`}
       style={{
-        backgroundColor: 'rgba(9, 22, 46, .8)' // Adjust opacity to your liking
+        backgroundColor: "rgba(9, 22, 46, .8)", // Adjust opacity to your liking
       }}
     >
       <div className="container  px-4 flex justify-between items-center mt-4">
@@ -56,25 +55,29 @@ const Navbar : React.FC =()=> {
         {/* Desktop Menu */}
         <div className="hidden md:flex space-x-6 justify-center flex-grow">
           {navItems.map((item) => (
-            <a 
+            <a
               key={item.name}
-              href={item.href} 
+              href={item.href}
               className="text-[#b1bdce] hover:text-white transition duration-300"
             >
               {item.name}
             </a>
           ))}
-        <button onClick={()=> setIsModalOpen(true)}> Quick Overview </button>
+          <button onClick={() => setIsModalOpen(true)}> Quick Overview </button>
         </div>
 
-        <button onClick={()=>{ 
-          setIsModalOpen(false)
-          setIsWalletModalOpen(true)}} className="hidden md:block bg-[#2669f5] text-white px-3 py-1.5 rounded-lg font-medium hover:bg-opacity-90 transition duration-300">
+        <button
+          onClick={() => {
+            setIsModalOpen(false);
+            setIsWalletModalOpen(true);
+          }}
+          className="hidden md:block bg-[#2669f5] text-white px-3 py-1.5 rounded-lg font-medium hover:bg-opacity-90 transition duration-300"
+        >
           Connect Wallet
         </button>
 
         {/* Mobile Menu Button */}
-        <button 
+        <button
           className="md:hidden text-white"
           onClick={() => setIsOpen(!isOpen)}
         >
@@ -84,38 +87,52 @@ const Navbar : React.FC =()=> {
 
       {/* Mobile Menu */}
       {isOpen && (
-        <div className="md:hidden bg-customBlue mt-4 py-2 max-w-full " 
-        style={
-         { backgroundColor: 'rgba(9, 22, 46, .8)'}
-        }>
+        <div
+          className="md:hidden bg-customBlue mt-4 py-2 max-w-full "
+          style={{ backgroundColor: "rgba(9, 22, 46, .8)" }}
+        >
           {navItems.map((item) => (
-            <a 
+            <a
               key={item.name}
-              href={item.href} 
+              href={item.href}
               className="block text-[#b1bdce] hover:text-white transition duration-300 py-2 px-4"
             >
               {item.name}
             </a>
-          ))
-          
-        }
-        <button onClick={()=>{ 
-          setIsModalOpen(true)}} className='ml-4 mt-2 mb-2 '> Quick Overview </button>
-         <div className=' flex items-center justify-center'>
-
-          <button onClick={()=>{ 
-          setIsModalOpen(false)
-          setIsOpen(false)
-          setIsWalletModalOpen(true)}} className="block text-left  bg-[#1199fa] text-white px-4 py-2 mt-2 rounded-lg font-medium hover:bg-opacity-90 transition duration-300">
-          Connect Wallet
-        </button>
-         </div>
+          ))}
+          <button
+            onClick={() => {
+              setIsModalOpen(true);
+            }}
+            className="ml-4 mt-2 mb-2 "
+          >
+            {" "}
+            Quick Overview{" "}
+          </button>
+          <div className=" flex items-center justify-center">
+            <button
+              onClick={() => {
+                setIsModalOpen(false);
+                setIsOpen(false);
+                setIsWalletModalOpen(true);
+              }}
+              className="block text-left  bg-blue-500 text-white px-4 py-2 mt-2 rounded-lg font-medium hover:bg-opacity-90 transition duration-300"
+            >
+              Connect Wallet
+            </button>
+          </div>
         </div>
       )}
-      <QuickOverviewModal isOpen={isModalOpen} onClose={()=>setIsModalOpen(false)} />
-      <ConnectMetamask isOpen={isWalletModalOpen} onClose={()=>setIsWalletModalOpen(false)} />
+      <QuickOverviewModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+      />
+      <ConnectMetamask
+        isOpen={isWalletModalOpen}
+        onClose={() => setIsWalletModalOpen(false)}
+      />
     </nav>
-  )
-} 
+  );
+};
 
 export default Navbar;

@@ -9,11 +9,13 @@ import { swapContractAbi } from "./GasEfficientBDTUSDSwap";
 import { ArbiscanTx } from "@/types/ArbiscanTx";
 import { ContractResponse } from "@/types/ContractResponse";
 import { stakeData } from "@/types/StakeData";
+import { faucetAbi } from "./faucet";
 
 const ARBITRUM_SEPOLIA_RPC = "https://sepolia-rollup.arbitrum.io/rpc";
 const BDT_ADDRESS = "0xf327e19106F172eE87Fb65896ACfc0757069BA3A";
 const USD_ADDRESS = "0x127490E895Cc21eAC9e247eeF157021db78F9061";
 const swapContract_ADDRESS = "0xC943F3591d171c69Bc7eC77e3A20dD43Bd428F6e";
+const faucet_ADDRESS = "0x20588dE1C6dAe2f4e00EBFEf8Bc66d6Dc6aa4693";
 const ARBISCAN_API_KEY = process.env.NEXT_PUBLIC_ARBISCAN_API_KEY;
 const ARBISCAN_API_URL = "https://api-sepolia.arbiscan.io/api";
 
@@ -223,7 +225,7 @@ export const fetchTxns = async (
         action: "tokentx",
         address: address,
         startblock: 0,
-        endblock: 'latest',
+        endblock: "latest",
         sort: "desc",
         apikey: ARBISCAN_API_KEY,
       },
@@ -307,7 +309,9 @@ export const fetchStakingData = async (address: string): Promise<stakeData> => {
   }
 };
 
-export const fetchAddressRewards = async (targetAddress: string): Promise<stakeData> => {
+export const fetchAddressRewards = async (
+  targetAddress: string
+): Promise<stakeData> => {
   let bdtReward = 0;
   let usdReward = 0;
 
@@ -324,20 +328,26 @@ export const fetchAddressRewards = async (targetAddress: string): Promise<stakeD
 
     const bdtContract = new ethers.Contract(
       BDT_ADDRESS,
-      ["event Transfer(address indexed from, address indexed to, uint256 value)"],
+      [
+        "event Transfer(address indexed from, address indexed to, uint256 value)",
+      ],
       provider
     );
 
     const usdContract = new ethers.Contract(
       USD_ADDRESS,
-      ["event Transfer(address indexed from, address indexed to, uint256 value)"],
+      [
+        "event Transfer(address indexed from, address indexed to, uint256 value)",
+      ],
       provider
     );
 
     const normalizedAddress = targetAddress.toLowerCase();
 
     for (const event of events) {
-      const receipt = await provider.getTransactionReceipt(event.transactionHash);
+      const receipt = await provider.getTransactionReceipt(
+        event.transactionHash
+      );
       if (!receipt) continue;
 
       const bdtTransfers = receipt.logs
@@ -350,7 +360,7 @@ export const fetchAddressRewards = async (targetAddress: string): Promise<stakeD
           const parsedLog = bdtContract.interface.parseLog(log);
           if (parsedLog) {
             const to = parsedLog.args[1].toLowerCase();
-            return to === normalizedAddress 
+            return to === normalizedAddress
               ? parseFloat(ethers.formatUnits(parsedLog.args[2].toString(), 18))
               : 0;
           }
@@ -594,3 +604,19 @@ export const swap = async (
     };
   }
 };
+
+export const getFaucetTokens = async () : Promise<boolean>=> {
+  const provider = new ethers.BrowserProvider(window.ethereum);
+  const signer = await provider.getSigner();
+  const contract = new ethers.Contract(faucet_ADDRESS,faucetAbi,signer);
+
+  try {
+    const tx = await contract.getTokens();
+    await tx.wait();
+    return true;
+  } catch (error) {
+    console.error("Error in faucet", error);
+    return false
+  }
+
+}

@@ -1,21 +1,33 @@
-'use client';
+"use client";
 
-import React, { createContext, useState, useContext, ReactNode, useCallback, useEffect } from 'react';
-import { connectWallet, fetchFee, fetchTxns, getBalances } from '../lib/web3/etherutiles';
-import { UtilFuncsResponse } from '@/types/UtilFuncsResponse';
-import { flushCookie } from '@/helpers/flushCookie';
-import toast from 'react-hot-toast';
-import { Transaction } from '@/types/TxnHistoryTypes';
-import getTokenPriceInUSD from '@/helpers/getPriceInUsd';
+import React, {
+  createContext,
+  useState,
+  useContext,
+  ReactNode,
+  useCallback,
+  useEffect,
+} from "react";
+import {
+  connectWallet,
+  fetchFee,
+  fetchTxns,
+  getBalances,
+} from "../lib/web3/etherutiles";
+import { UtilFuncsResponse } from "@/types/UtilFuncsResponse";
+import { flushCookie } from "@/helpers/flushCookie";
+import toast from "react-hot-toast";
+import { Transaction } from "@/types/TxnHistoryTypes";
+import getTokenPriceInUSD from "@/helpers/getPriceInUsd";
 
 interface WalletContextType {
   address: string | null;
-  usdPrice : number;
-  swapFee : string | null;
-  ethBal : string | null;
-  bdtBal : string | null;
-  usdBal : string | null;
-  walletBalance : string | null;
+  usdPrice: number;
+  swapFee: string | null;
+  ethBal: string | null;
+  bdtBal: string | null;
+  usdBal: string | null;
+  walletBalance: string | null;
   txns?: Array<Transaction> | [];
   connect: () => Promise<UtilFuncsResponse | undefined>;
   disconnect: () => void;
@@ -23,7 +35,6 @@ interface WalletContextType {
   setUsdBal: React.Dispatch<React.SetStateAction<string | null>>;
   setEthBal: React.Dispatch<React.SetStateAction<string | null>>;
   setWalletBalance: React.Dispatch<React.SetStateAction<string | null>>;
-
 }
 
 const WalletContext = createContext<WalletContextType | undefined>(undefined);
@@ -31,48 +42,48 @@ const WalletContext = createContext<WalletContextType | undefined>(undefined);
 export function WalletProvider({ children }: { children: ReactNode }) {
   const usdPrice = 120;
   const [address, setAddress] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('walletAddress');
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("walletAddress");
     }
     return null;
   });
 
   const [walletBalance, setWalletBalance] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('walletBalance');
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("walletBalance");
     }
     return null;
   });
 
   const [swapFee, setSwapFee] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('swapFee');
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("swapFee");
     }
     return null;
   });
 
   const [bdtBal, setBdtBal] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('bdtBal');
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("bdtBal");
     }
     return null;
   });
   const [usdBal, setUsdBal] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('usdBal');
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("usdBal");
     }
     return null;
   });
   const [ethBal, setEthBal] = useState<string | null>(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('ethBal');
+    if (typeof window !== "undefined") {
+      return sessionStorage.getItem("ethBal");
     }
     return null;
   });
 
   const [txns, setTxns] = useState<Array<Transaction>>(() => {
-    if (typeof window !== 'undefined') {
-      const storedTxns = sessionStorage.getItem('txns');
+    if (typeof window !== "undefined") {
+      const storedTxns = sessionStorage.getItem("txns");
       return storedTxns ? JSON.parse(storedTxns) : [];
     }
     return [];
@@ -83,7 +94,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (response.success && response.address) {
       const newAddress = response.address.toLowerCase();
       setAddress(newAddress);
-      sessionStorage.setItem('walletAddress', newAddress);
+      sessionStorage.setItem("walletAddress", newAddress);
       await fetchBalance(newAddress);
       await fetchTransactions(newAddress); // Fetch and store transactions
     } else {
@@ -96,7 +107,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const response: UtilFuncsResponse = await fetchTxns(address);
     if (response.success && response.txns) {
       setTxns(response.txns);
-      sessionStorage.setItem('txns', JSON.stringify(response.txns)); // Persist transactions in sessionStorage
+      sessionStorage.setItem("txns", JSON.stringify(response.txns)); // Persist transactions in sessionStorage
       return response.txns; // Return the fetched transactions
     } else {
       console.error(response.error);
@@ -108,11 +119,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     const response: string | null = await fetchFee();
     if (response) {
       setSwapFee(response);
-      sessionStorage.setItem('swapFee', JSON.stringify(response));
-    } 
+      sessionStorage.setItem("swapFee", JSON.stringify(response));
+    }
   }, []);
 
-  const fetchBalance = useCallback(async (newAddress : string) => {
+  const fetchBalance = useCallback(async (newAddress: string) => {
     if (newAddress) {
       try {
         const balanceValue: any = await getBalances(newAddress);
@@ -120,20 +131,23 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         setUsdBal(parseFloat(balanceValue?.USD).toString());
         setEthBal(parseFloat(balanceValue?.ETH).toString());
         const res = await getTokenPriceInUSD("ethereum");
-        const ethToBDT = parseFloat(balanceValue?.ETH)*res.price*usdPrice;
-        const totalBal = (parseFloat(balanceValue?.BDT) + parseFloat(balanceValue?.USD)*usdPrice + ethToBDT );
+        const ethToBDT = parseFloat(balanceValue?.ETH) * res.price * usdPrice;
+        const totalBal =
+          parseFloat(balanceValue?.BDT) +
+          parseFloat(balanceValue?.USD) * usdPrice +
+          ethToBDT;
         setWalletBalance(totalBal.toFixed(2));
       } catch (error) {
         console.error("Error Fetching Balance: ", error);
       }
     }
-  },[]);
+  }, []);
 
   const disconnect = useCallback(() => {
     setAddress(null);
     setTxns([]); // Clear the transactions
-    sessionStorage.removeItem('walletAddress');
-    sessionStorage.removeItem('txns'); // Clear stored transactions
+    sessionStorage.removeItem("walletAddress");
+    sessionStorage.removeItem("txns"); // Clear stored transactions
     flushCookie();
   }, []);
 
@@ -145,7 +159,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
       fetchTransactions(address).catch((error) => {
         console.error("Error fetching txns:", error);
-      })
+      });
 
       fetchSwapFee().catch((error) => {
         console.error("Error fetching SwapFee:", error);
@@ -154,13 +168,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, [address]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && window.ethereum) {
+    if (typeof window !== "undefined" && window.ethereum) {
       const handleAccountsChanged = (accounts: string[]) => {
         if (address) {
           if (accounts.length > 0) {
             const newAddress = accounts[0].toLowerCase();
             if (newAddress !== address) {
-              toast.error('Account changed! Please log in with this address.');
+              toast.error("Account changed! Please log in with this address.");
               disconnect();
             }
           } else {
@@ -169,10 +183,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         }
       };
 
-      window.ethereum.on('accountsChanged', handleAccountsChanged);
+      window.ethereum.on("accountsChanged", handleAccountsChanged);
 
       return () => {
-        window.ethereum?.removeListener('accountsChanged', handleAccountsChanged);
+        window.ethereum?.removeListener(
+          "accountsChanged",
+          handleAccountsChanged
+        );
       };
     }
   }, [address, disconnect]);
@@ -204,7 +221,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 export const useWallet = (): WalletContextType => {
   const context = useContext(WalletContext);
   if (context === undefined) {
-    throw new Error('useWallet must be used within a WalletProvider');
+    throw new Error("useWallet must be used within a WalletProvider");
   }
   return context;
 };

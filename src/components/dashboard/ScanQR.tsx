@@ -11,23 +11,15 @@ interface QRScannerProps extends ModalProps {
 }
 
 const QRScanner: React.FC<QRScannerProps> = ({ isOpen, onClose, handleAddressScanned }) => {
-  const [error, setError] = useState<string | null>(null);
 
   const handleDecode = (result: any) => {
     if (/^0x[a-fA-F0-9]{40}$/.test(result[0].rawValue)) {
       if (handleAddressScanned) handleAddressScanned(result[0].rawValue);
       onClose();
     } else {
-      setError("Invalid Ethereum address format");
       toast.error("Invalid Ethereum address format");
     }
   };
-
-  // const handleError = (error: Error) => {
-  //   console.error("QR Code Scan Error", error);
-  //   setError("Error scanning QR code");
-  //   toast.error("Error scanning QR code");
-  // };
 
   if (!isOpen) return null;
 
@@ -42,24 +34,19 @@ const QRScanner: React.FC<QRScannerProps> = ({ isOpen, onClose, handleAddressSca
       >
         <FiX size={24} />
       </button>
-      <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Scan QR Code</h2>
+      <h2 className="text-3xl text-center mb-6 font-extrabold text-blue-600">Scan QR Code</h2>
       <div className="relative h-64 md:h-96 w-full">
         <Scanner
         components={ {audio : false} }        
           onScan={(result) => {
             handleDecode(result);
           }}
-          constraints={{ facingMode: 'environment',  noiseSuppression: true }}
+          constraints={{ facingMode: 'environment' }}
         />
       </div>
       <p className="text-gray-600 text-center mt-4 text-sm">
         Position the QR code within the frame to scan.
       </p>
-      {/* {error && (
-        <p className="mt-2 text-sm text-red-600">
-          {error}
-        </p>
-      )} */}
     </div>
   </div>
   

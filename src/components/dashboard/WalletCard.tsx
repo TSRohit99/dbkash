@@ -7,12 +7,12 @@ import {
   FiArrowUp,
   FiRefreshCw,
   FiCopy,
+  
 } from "react-icons/fi";
 import { LuLogOut } from "react-icons/lu";
 import Link from "next/link";
 import WalletQR from "./ShowQR";
 import { copyToClipboard } from "@/helpers/CopyItem";
-import { getBalances } from "../../lib/web3/etherutiles";
 import { useWallet } from "@/context/WalletProvider";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -22,8 +22,9 @@ import { WalletCardProps } from "@/types/WalletCardProps";
 import SettingsModal from "./Settings";
 import axios from "axios";
 import { checkIfTheyNew } from "@/lib/checkIfTheyNew";
-import getTokenPriceInUSD from "@/helpers/getPriceInUsd";
 import SwapInterface from "./Swap";
+import ClaimModal from "./ClaimModal";
+import { HandCoins } from "lucide-react";
 
 const addressTrimmer = (address: string | null) => {
   return address
@@ -31,9 +32,12 @@ const addressTrimmer = (address: string | null) => {
     : null;
 };
 
-const WalletInterface: React.FC<WalletCardProps> = ({ scannedAddress ,  handleAddressScanned}) => {
+const WalletInterface: React.FC<WalletCardProps> = ({
+  scannedAddress,
+  handleAddressScanned,
+}) => {
   const router = useRouter();
-  const { address, disconnect, walletBalance, usdPrice } = useWallet();
+  const { address, disconnect, walletBalance } = useWallet();
   const [trimmedWalletAddress, setTrimmedWalletAddress] = useState<
     string | null
   >(null);
@@ -43,6 +47,7 @@ const WalletInterface: React.FC<WalletCardProps> = ({ scannedAddress ,  handleAd
   const [isSMModalOpen, setIsSMModalOpen] = useState(false);
   const [isSTModalOpen, setIsSTModalOpen] = useState(false);
   const [isSwapModalOPen, setIsSwapModalOpen] = useState(false);
+  const [isClaimModalOPen, setIsClaimModalOpen] = useState(false);
 
   useEffect(() => {
     if (address) {
@@ -101,6 +106,10 @@ const WalletInterface: React.FC<WalletCardProps> = ({ scannedAddress ,  handleAd
     setIsSTModalOpen(true);
   };
 
+  const handleFaucetClaim = () => {
+    setIsClaimModalOpen(true);
+  };
+
   return (
     <>
       <div className="font-sans mx-auto bg-gradient-to-bl from-blue-500 to-customBlue rounded-3xl p-6 text-white m-0 box-border">
@@ -111,6 +120,9 @@ const WalletInterface: React.FC<WalletCardProps> = ({ scannedAddress ,  handleAd
             </h2>
           </Link>
           <div>
+            <button onClick={handleFaucetClaim}>
+            <HandCoins  className="inline-block mr-3 text-xl" />
+            </button>
             <button onClick={handleSettings}>
               <FiSettings className="inline-block mr-3 text-xl" />
             </button>
@@ -192,13 +204,18 @@ const WalletInterface: React.FC<WalletCardProps> = ({ scannedAddress ,  handleAd
         isOpen={isSMModalOpen}
         onClose={() => setIsSMModalOpen(false)}
         scannedAddress={scannedAddress}
-        handleAddressScanned = {handleAddressScanned}
+        handleAddressScanned={handleAddressScanned}
       />
 
       <SwapInterface
         isOpen={isSwapModalOPen}
         onClose={() => setIsSwapModalOpen(false)}
       />
+
+      <ClaimModal 
+       isOpen={isClaimModalOPen}
+       onClose={() => setIsClaimModalOpen(false)}
+     />
     </>
   );
 };

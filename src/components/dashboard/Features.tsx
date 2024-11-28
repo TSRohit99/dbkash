@@ -1,4 +1,4 @@
-'use client'
+"use client";
 
 import React, { useState } from "react";
 import { FaRegAddressBook } from "react-icons/fa";
@@ -9,16 +9,26 @@ import StakeModal from "./Stake";
 
 const FeatureButtons: React.FC = () => {
   const features = [
-    { icon: <FaMoneyBillTrendUp />, label: "Stake", color: "bg-green-500", hover: "hover:bg-green-600" },
-    { icon: <FaRegAddressBook />, label: "Address Book", color: "bg-purple-500", hover: "hover:bg-purple-600" },
-    { 
-      icon: <ArbiWinzLogo />, 
-      label: "Play Lottery", 
-      color: "bg-blue-900", 
-      hover: "hover:from-indigo-700 hover:via-blue-600 hover:to-cyan-600" 
+    {
+      icon: <FaMoneyBillTrendUp />,
+      label: "Stake",
+      color: "bg-green-500",
+      hover: "hover:bg-green-600",
+    },
+    {
+      icon: <FaRegAddressBook />,
+      label: "Address Book",
+      color: "bg-purple-500",
+      hover: "hover:bg-purple-600",
+    },
+    {
+      icon: <ArbiWinzLogo />,
+      label: "Play Lottery",
+      color: "bg-blue-900",
+      hover: "hover:from-indigo-700 hover:via-blue-600 hover:to-cyan-600",
     },
   ];
-  
+
   const [isABModalOpen, setIsABModalOpen] = useState(false);
 
   const [isStakeModalOpen, setIsStakeModalOpen] = useState(false);
@@ -48,7 +58,7 @@ const FeatureButtons: React.FC = () => {
               if (feature.label === "Play Lottery") {
                 handlePlayLottery();
               }
-              if (feature.label ===  "Stake") {
+              if (feature.label === "Stake") {
                 handleStake();
               }
             }}
@@ -60,8 +70,14 @@ const FeatureButtons: React.FC = () => {
           </button>
         ))}
       </div>
-      <AddressBookComponent isOpen={isABModalOpen} onClose={() => setIsABModalOpen(false)} />
-      <StakeModal isOpen={isStakeModalOpen} onClose={() => setIsStakeModalOpen(false)} />
+      <AddressBookComponent
+        isOpen={isABModalOpen}
+        onClose={() => setIsABModalOpen(false)}
+      />
+      <StakeModal
+        isOpen={isStakeModalOpen}
+        onClose={() => setIsStakeModalOpen(false)}
+      />
     </>
   );
 };

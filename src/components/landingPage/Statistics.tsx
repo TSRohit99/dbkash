@@ -1,12 +1,12 @@
 import React from "react";
 
-const Statistics : React.FC = ()=> {
+const Statistics: React.FC = () => {
   const stats = [
     { number: "100", text: "Total Users" },
     { number: "200", text: "BDT in Circulation" },
     { number: "300", text: "Total Transactions" },
     { number: "400", text: "Total Transactions Volume" },
-  ]
+  ];
   return (
     <section className="text-center py-16">
       <div className="container px-5">
@@ -26,14 +26,13 @@ const Statistics : React.FC = ()=> {
                 <span className="text-[#1199fa]">+</span>
               </div>
               <br />
-              <p className="text-[#7f8fa4]"> 
-                {data.text}</p>
+              <p className="text-[#7f8fa4]">{data.text}</p>
             </div>
           ))}
         </div>
       </div>
     </section>
   );
-}
+};
 
 export default Statistics;

@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useState } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
-import { FiX, FiCopy } from 'react-icons/fi';
-import {copyToClipboard} from '@/helpers/CopyItem'
+import React, { useState } from "react";
+import { QRCodeSVG } from "qrcode.react";
+import { FiX, FiCopy } from "react-icons/fi";
+import { copyToClipboard } from "@/helpers/CopyItem";
 
 interface WalletQRProps {
-  isOpen: boolean;  
+  isOpen: boolean;
   address: string | null;
   onClose: () => void;
 }
 
-const WalletQR: React.FC<WalletQRProps> = ({ address,isOpen, onClose }) => {
-    if (!isOpen) return null;
+const WalletQR: React.FC<WalletQRProps> = ({ address, isOpen, onClose }) => {
+  if (!isOpen) return null;
   const [copied, setCopied] = useState(false);
 
   return (
@@ -24,15 +24,18 @@ const WalletQR: React.FC<WalletQRProps> = ({ address,isOpen, onClose }) => {
         >
           <FiX size={24} />
         </button>
-        <h2 className="text-3xl font-bold text-center mb-6 text-gray-800">Scan to Send Funds</h2>
+        <h2 className="text-3xl font-extrabold text-center mb-6 text-blue-600">
+          Scan to Send Funds
+        </h2>
         <div className="flex justify-center mb-6">
           <QRCodeSVG value={address || "Not found"} size={200} />
         </div>
         <div className="bg-gray-100 p-4 rounded-lg flex items-center justify-between mb-4">
           <span className="text-sm text-gray-600 truncate mr-2">{address}</span>
           <button
-            onClick={()=>{copyToClipboard(address)
-              setCopied(true)
+            onClick={() => {
+              copyToClipboard(address);
+              setCopied(true);
             }}
             className="text-blue-500 hover:text-blue-600 transition duration-300"
           >
@@ -40,7 +43,9 @@ const WalletQR: React.FC<WalletQRProps> = ({ address,isOpen, onClose }) => {
           </button>
         </div>
         {copied && (
-          <p className="text-green-500 text-sm text-center">Address copied to clipboard!</p>
+          <p className="text-green-500 text-sm text-center">
+            Address copied to clipboard!
+          </p>
         )}
         <p className="text-gray-600 text-center mt-4 text-sm">
           Scan this QR code or copy the address to send funds to this wallet.
