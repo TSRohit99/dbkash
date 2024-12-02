@@ -12,7 +12,6 @@ import {
 import { LuLogOut } from "react-icons/lu";
 import Link from "next/link";
 import WalletQR from "./ShowQR";
-import { copyToClipboard } from "@/helpers/CopyItem";
 import { useWallet } from "@/context/WalletProvider";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
@@ -25,12 +24,9 @@ import { checkIfTheyNew } from "@/lib/checkIfTheyNew";
 import SwapInterface from "./Swap";
 import ClaimModal from "./ClaimModal";
 import { HandCoins } from "lucide-react";
+import { addressTrimmer } from "@/helpers/AddressTrimmer";
+import Copybtn from "@/helpers/Copybtn";
 
-const addressTrimmer = (address: string | null) => {
-  return address
-    ? `${address.slice(0, 4)}...${address.slice(-3)}`.toLowerCase()
-    : null;
-};
 
 const WalletInterface: React.FC<WalletCardProps> = ({
   scannedAddress,
@@ -143,16 +139,16 @@ const WalletInterface: React.FC<WalletCardProps> = ({
           )}
         </div>
 
-        <div className="flex mt-4 gap-2">
+        <div className="flex mt-4">
           <div className="text-sm">
             {trimmedWalletAddress || (
               <Skeleton className="h-4 w-[60px] bg-white" />
             )}
           </div>
-          <div className="flex justify-center items-center hover:bg-blue-400 transition duration-300">
-            <button onClick={() => copyToClipboard(address)}>
-              <FiCopy />
-            </button>
+          <div className="flex -mt-1 justify-center items-center">
+          {
+            address ? <Copybtn address={address}/> : null
+          }
           </div>
         </div>
 

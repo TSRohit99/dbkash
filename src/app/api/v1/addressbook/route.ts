@@ -20,8 +20,6 @@ export async function POST(request: Request): Promise<Response> {
       { new: true } // Return the updated document
     );
 
-    console.log("User after update:", user);
-
     if (!user) {
       console.log("No user found with the provided address.");
       return createResponse(

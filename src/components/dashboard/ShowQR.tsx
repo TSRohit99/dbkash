@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { QRCodeSVG } from "qrcode.react";
 import { FiX, FiCopy } from "react-icons/fi";
-import { copyToClipboard } from "@/helpers/CopyItem";
+import Copybtn from "@/helpers/Copybtn";
 
 interface WalletQRProps {
   isOpen: boolean;
@@ -13,7 +13,6 @@ interface WalletQRProps {
 
 const WalletQR: React.FC<WalletQRProps> = ({ address, isOpen, onClose }) => {
   if (!isOpen) return null;
-  const [copied, setCopied] = useState(false);
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm z-50 flex justify-center items-center p-4">
@@ -32,21 +31,10 @@ const WalletQR: React.FC<WalletQRProps> = ({ address, isOpen, onClose }) => {
         </div>
         <div className="bg-gray-100 p-4 rounded-lg flex items-center justify-between mb-4">
           <span className="text-sm text-gray-600 truncate mr-2">{address}</span>
-          <button
-            onClick={() => {
-              copyToClipboard(address);
-              setCopied(true);
-            }}
-            className="text-blue-500 hover:text-blue-600 transition duration-300"
-          >
-            <FiCopy size={20} />
-          </button>
+          {
+            address ? <Copybtn address={address}/> : null
+          }
         </div>
-        {copied && (
-          <p className="text-green-500 text-sm text-center">
-            Address copied to clipboard!
-          </p>
-        )}
         <p className="text-gray-600 text-center mt-4 text-sm">
           Scan this QR code or copy the address to send funds to this wallet.
         </p>

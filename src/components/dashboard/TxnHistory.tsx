@@ -12,16 +12,12 @@ import { ModalProps } from "@/types/ModalProps";
 import { Transaction, TransactionType } from "@/types/TxnHistoryTypes";
 import Link from "next/link";
 import { useWallet } from "@/context/WalletProvider";
+import { addressTrimmer } from "@/helpers/AddressTrimmer";
+import Copybtn from "@/helpers/Copybtn";
 
 const TransactionHistoryModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
   const { txns } = useWallet();
   const transactions: Transaction[] | undefined = txns;
-
-  const formatAddress = (address: string): string => {
-    return `${address.substring(0, 4)}....${address.substring(
-      address.length - 3
-    )}`;
-  };
 
   const getIcon = (type: TransactionType): JSX.Element => {
     switch (type) {
@@ -72,10 +68,16 @@ const TransactionHistoryModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
 
                     <div className="flex-grow min-w-0">
                       <p className="font-semibold text-blue-500 hover:text-blue-700 text-sm sm:text-base truncate">
-                        {formatAddress(getTransactionParty(transaction))}
+                        {addressTrimmer(getTransactionParty(transaction))}
                       </p>
-                      <p className="text-xs sm:text-sm text-gray-500">
+                      <p className="text-[11px] sm:text-sm text-gray-500">
                         {transaction.date} at {transaction.time}
+                      </p>
+                      <p className="text-xs sm:text-sm text-gray-500 flex flex-row">
+                        Txn ID: {addressTrimmer(transaction.id)}{" "}
+                       <div className="-mt-1">
+                       <Copybtn address={transaction.id}/>
+                       </div>
                       </p>
                     </div>
 

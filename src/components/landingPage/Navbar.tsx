@@ -7,8 +7,8 @@ import QuickOverviewModal from "./QuickOverviewModal";
 import ConnectMetamask from "../dashboard/ConnectWallet";
 
 const navItems = [
-  { name: "Swap", href: "#" },
-  { name: "Stake", href: "#" },
+  { name: "Swap", href: "/dashboard" },
+  { name: "Stake", href: "/dashboard" },
   { name: "FAQ", href: "#faq" },
   { name: "About", href: "#about" },
 ];
