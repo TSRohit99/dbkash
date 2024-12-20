@@ -56,7 +56,7 @@ const SettingsModal: React.FC<SettingsProps> = ({
     setIsVloading(true);
 
     try {
-      const response = await axios.post("/api/v1/trigger-resend", {
+      const response = await axios.post("/api/v1/trigger-mail", {
         name,
         email,
       });

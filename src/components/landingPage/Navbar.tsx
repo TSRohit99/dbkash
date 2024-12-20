@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
 import QuickOverviewModal from "./QuickOverviewModal";
 import ConnectMetamask from "../dashboard/ConnectWallet";
+import { useRouter } from "next/navigation";
 
 const navItems = [
   { name: "Swap", href: "/dashboard" },
@@ -19,6 +20,8 @@ const Navbar: React.FC = () => {
   const [isWalletModalOpen, setIsWalletModalOpen] = useState(false);
   const [show, setShow] = useState(true);
   const [scrollPos, setScrollPos] = useState(0);
+
+  const router = useRouter();
 
   const handleScroll = () => {
     const currentScrollPos = window.scrollY;
@@ -69,7 +72,7 @@ const Navbar: React.FC = () => {
         <button
           onClick={() => {
             setIsModalOpen(false);
-            setIsWalletModalOpen(true);
+            router.replace("/dashboard");
           }}
           className="hidden md:block bg-[#2669f5] text-white px-3 py-1.5 rounded-lg font-medium hover:bg-opacity-90 transition duration-300"
         >
@@ -114,7 +117,7 @@ const Navbar: React.FC = () => {
               onClick={() => {
                 setIsModalOpen(false);
                 setIsOpen(false);
-                setIsWalletModalOpen(true);
+                router.replace("/dashboard");
               }}
               className="block text-left  bg-blue-500 text-white px-4 py-2 mt-2 rounded-lg font-medium hover:bg-opacity-90 transition duration-300"
             >
@@ -126,10 +129,6 @@ const Navbar: React.FC = () => {
       <QuickOverviewModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-      />
-      <ConnectMetamask
-        isOpen={isWalletModalOpen}
-        onClose={() => setIsWalletModalOpen(false)}
       />
     </nav>
   );

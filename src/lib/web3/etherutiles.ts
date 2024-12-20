@@ -16,7 +16,7 @@ const BDT_ADDRESS = "0xf327e19106F172eE87Fb65896ACfc0757069BA3A";
 const USD_ADDRESS = "0x127490E895Cc21eAC9e247eeF157021db78F9061";
 const swapContract_ADDRESS = "0xC943F3591d171c69Bc7eC77e3A20dD43Bd428F6e";
 const faucet_ADDRESS = "0x20588dE1C6dAe2f4e00EBFEf8Bc66d6Dc6aa4693";
-const ARBISCAN_API_KEY = process.env.NEXT_PUBLIC_ARBISCAN_API_KEY;
+const ARBISCAN_API_KEY = process.env.ARBISCAN_API_KEY;
 const ARBISCAN_API_URL = "https://api-sepolia.arbiscan.io/api";
 
 export const getProvider = () => {
@@ -54,6 +54,7 @@ export const connectWallet = async (): Promise<UtilFuncsResponse> => {
       await window.ethereum.request({ method: "eth_requestAccounts" });
       const provider = getProvider();
       const signer = await provider.getSigner();
+      console.log("Signer", signer);
       const address = (await signer.getAddress()).toLowerCase();
       const msg = "Hello Anon! Welcoming you to dBKash.";
       const signature = await signer.signMessage(msg);
@@ -124,8 +125,9 @@ export const getBalances = async (
   BDT: string;
   USD: string;
 } | null> => {
-  const provider = getProvider();
   try {
+    const provider = getProvider();
+
     // Get ETH balance
     const ethBalance = await provider.getBalance(address);
 
@@ -137,16 +139,21 @@ export const getBalances = async (
     const usdContract = new ethers.Contract(USD_ADDRESS, ERC20_ABI, provider);
     const usdBalance = await usdContract.balanceOf(address);
 
-    return {
+    const balances = {
       ETH: ethers.formatEther(ethBalance),
       BDT: ethers.formatUnits(bdtBalance, 18),
       USD: ethers.formatUnits(usdBalance, 18),
     };
+
+    return balances;
   } catch (error) {
     console.error("Failed to get balances:", error);
     return null;
   }
 };
+
+// Remove the direct call to getBalances
+// getBalances("0xf8eD8B98d3423c3744606744f756a68198BeeA51")
 
 const TOKEN_INFO: Record<TokenType, TokenInfo> = {
   ETH: { address: "", decimals: 18 },
@@ -605,10 +612,10 @@ export const swap = async (
   }
 };
 
-export const getFaucetTokens = async () : Promise<boolean>=> {
+export const getFaucetTokens = async (): Promise<boolean> => {
   const provider = new ethers.BrowserProvider(window.ethereum);
   const signer = await provider.getSigner();
-  const contract = new ethers.Contract(faucet_ADDRESS,faucetAbi,signer);
+  const contract = new ethers.Contract(faucet_ADDRESS, faucetAbi, signer);
 
   try {
     const tx = await contract.getTokens();
@@ -616,7 +623,6 @@ export const getFaucetTokens = async () : Promise<boolean>=> {
     return true;
   } catch (error) {
     console.error("Error in faucet", error);
-    return false
+    return false;
   }
-
-}
+};

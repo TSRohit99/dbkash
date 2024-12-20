@@ -4,6 +4,7 @@ import { createResponse } from "@/helpers/CreateResponse";
 import { sendVerificationEmail } from "@/helpers/sendVerificationEMail";
 import bcrypt from 'bcrypt'
 import { headers } from "next/headers";
+import { sendNMVerificationEmail } from "@/helpers/sendNMVerification";
 
 export async function POST(request: Request): Promise<Response> {
     const req = await request.json();
@@ -25,7 +26,8 @@ export async function POST(request: Request): Promise<Response> {
         const hashedVerifyCode = await bcrypt.hash(verifyCode, 10);
         
         // Send verification email
-        const emailResponse = await sendVerificationEmail(name , email, verifyCode);
+        const emailResponse = await sendNMVerificationEmail(name , email, verifyCode); //NodeMailer
+        // const emailResponse = await sendVerificationEmail(name , email, verifyCode); //Resend email
         if(!emailResponse.success){
             return createResponse({
                 success: false,

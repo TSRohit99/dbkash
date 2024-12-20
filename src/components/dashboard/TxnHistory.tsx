@@ -73,12 +73,12 @@ const TransactionHistoryModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                       <p className="text-[11px] sm:text-sm text-gray-500">
                         {transaction.date} at {transaction.time}
                       </p>
-                      <p className="text-xs sm:text-sm text-gray-500 flex flex-row">
+                      <div className="text-xs sm:text-sm text-gray-500 flex flex-row">
                         Txn ID: {addressTrimmer(transaction.id)}{" "}
-                       <div className="-mt-1">
-                       <Copybtn address={transaction.id}/>
-                       </div>
-                      </p>
+                        <div className="-mt-1">
+                          <Copybtn address={transaction.id} />
+                        </div>
+                      </div>
                     </div>
 
                     <div
@@ -89,7 +89,7 @@ const TransactionHistoryModal: React.FC<ModalProps> = ({ isOpen, onClose }) => {
                           : "text-red-500"
                       }`}
                     >
-                      {`${transaction.amount} ${transaction.tokenType}`}
+                      {`${parseFloat(transaction.amount).toFixed(3)} ${transaction.tokenType}`}
                     </div>
                   </div>
 

@@ -124,24 +124,35 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const fetchBalance = useCallback(async (newAddress: string) => {
-    if (newAddress) {
-      try {
-        const balanceValue: any = await getBalances(newAddress);
-        setBdtBal(parseFloat(balanceValue?.BDT).toString());
-        setUsdBal(parseFloat(balanceValue?.USD).toString());
-        setEthBal(parseFloat(balanceValue?.ETH).toString());
-        const res = await getTokenPriceInUSD("ethereum");
-        const ethToBDT = parseFloat(balanceValue?.ETH) * res.price * usdPrice;
-        const totalBal =
-          parseFloat(balanceValue?.BDT) +
-          parseFloat(balanceValue?.USD) * usdPrice +
-          ethToBDT;
-        setWalletBalance(totalBal.toFixed(2));
-      } catch (error) {
-        console.error("Error Fetching Balance: ", error);
+    try {
+      const balanceValue: any = await getBalances(newAddress);
+  
+      if (!balanceValue) {
+        console.error("No balance data returned from getBalances.");
+        return;
       }
+  
+      setBdtBal(parseFloat(balanceValue?.BDT).toString());
+      setUsdBal(parseFloat(balanceValue?.USD).toString());
+      setEthBal(parseFloat(balanceValue?.ETH).toString());
+  
+      const res = await getTokenPriceInUSD("ethereum");
+      if (!res?.price) {
+        console.error("Failed to fetch token price.");
+        return;
+      }
+  
+      const ethToBDT = parseFloat(balanceValue?.ETH) * res.price * usdPrice;
+      const totalBal =
+        parseFloat(balanceValue?.BDT) +
+        parseFloat(balanceValue?.USD) * usdPrice +
+        ethToBDT;
+      setWalletBalance(totalBal.toFixed(2));
+    } catch (error) {
+      console.error("Error fetching balance:", error);
     }
   }, []);
+  
 
   const disconnect = useCallback(() => {
     setAddress(null);
