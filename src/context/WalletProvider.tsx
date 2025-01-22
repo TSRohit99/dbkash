@@ -11,7 +11,7 @@ import React, {
 import {
   connectWallet,
   fetchFee,
-  fetchTxns,
+  // fetchTxns,
   getBalances,
 } from "../lib/web3/etherutiles";
 import { UtilFuncsResponse } from "@/types/UtilFuncsResponse";
@@ -28,7 +28,7 @@ interface WalletContextType {
   bdtBal: string | null;
   usdBal: string | null;
   walletBalance: string | null;
-  txns?: Array<Transaction> | [];
+  // txns?: Array<Transaction> | [];
   connect: () => Promise<UtilFuncsResponse | undefined>;
   disconnect: () => void;
   setBdtBal: React.Dispatch<React.SetStateAction<string | null>>;
@@ -81,13 +81,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     return null;
   });
 
-  const [txns, setTxns] = useState<Array<Transaction>>(() => {
-    if (typeof window !== "undefined") {
-      const storedTxns = sessionStorage.getItem("txns");
-      return storedTxns ? JSON.parse(storedTxns) : [];
-    }
-    return [];
-  });
+  // const [txns, setTxns] = useState<Array<Transaction>>(() => {
+  //   if (typeof window !== "undefined") {
+  //     const storedTxns = sessionStorage.getItem("txns");
+  //     return storedTxns ? JSON.parse(storedTxns) : [];
+  //   }
+  //   return [];
+  // });
 
   const connect = useCallback(async () => {
     const response: UtilFuncsResponse = await connectWallet();
@@ -96,24 +96,24 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setAddress(newAddress);
       sessionStorage.setItem("walletAddress", newAddress);
       await fetchBalance(newAddress);
-      await fetchTransactions(newAddress); // Fetch and store transactions
+      // await fetchTransactions(newAddress); // Fetch and store transactions
     } else {
       console.error(response.error);
     }
     return response;
   }, []);
 
-  const fetchTransactions = useCallback(async (address: string) => {
-    const response: UtilFuncsResponse = await fetchTxns(address);
-    if (response.success && response.txns) {
-      setTxns(response.txns);
-      sessionStorage.setItem("txns", JSON.stringify(response.txns)); // Persist transactions in sessionStorage
-      return response.txns; // Return the fetched transactions
-    } else {
-      console.error(response.error);
-      return []; // Return an empty array in case of error
-    }
-  }, []);
+  // const fetchTransactions = useCallback(async (address: string) => {
+  //   const response: UtilFuncsResponse = await fetchTxns(address);
+  //   if (response.success && response.txns) {
+  //     setTxns(response.txns);
+  //     sessionStorage.setItem("txns", JSON.stringify(response.txns)); // Persist transactions in sessionStorage
+  //     return response.txns; // Return the fetched transactions
+  //   } else {
+  //     console.error(response.error);
+  //     return []; // Return an empty array in case of error
+  //   }
+  // }, []);
 
   const fetchSwapFee = useCallback(async () => {
     const response: string | null = await fetchFee();
@@ -156,7 +156,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const disconnect = useCallback(() => {
     setAddress(null);
-    setTxns([]); // Clear the transactions
+    // setTxns([]); // Clear the transactions
     sessionStorage.removeItem("walletAddress");
     sessionStorage.removeItem("txns"); // Clear stored transactions
     flushCookie();
@@ -168,9 +168,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         console.error("Error fetching balance:", error);
       });
 
-      fetchTransactions(address).catch((error) => {
-        console.error("Error fetching txns:", error);
-      });
+      // fetchTransactions(address).catch((error) => {
+      //   console.error("Error fetching txns:", error);
+      // });
 
       fetchSwapFee().catch((error) => {
         console.error("Error fetching SwapFee:", error);
@@ -211,7 +211,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         address,
         connect,
         disconnect,
-        txns,
+        // txns,
         usdPrice,
         swapFee,
         ethBal,

@@ -16,8 +16,8 @@ const BDT_ADDRESS = "0xf327e19106F172eE87Fb65896ACfc0757069BA3A";
 const USD_ADDRESS = "0x127490E895Cc21eAC9e247eeF157021db78F9061";
 const swapContract_ADDRESS = "0xC943F3591d171c69Bc7eC77e3A20dD43Bd428F6e";
 const faucet_ADDRESS = "0x20588dE1C6dAe2f4e00EBFEf8Bc66d6Dc6aa4693";
-const ARBISCAN_API_KEY = process.env.ARBISCAN_API_KEY;
-const ARBISCAN_API_URL = "https://api-sepolia.arbiscan.io/api";
+const ARBISCAN_API_KEY = process.env.NEXT_PUBLIC_ARBISCAN_API_KEY;
+const ARBISCAN_API_URL = "https://api-sepolia.arbiscan.io/api"; 
 
 export const getProvider = () => {
   if (typeof window !== "undefined" && window.ethereum) {
