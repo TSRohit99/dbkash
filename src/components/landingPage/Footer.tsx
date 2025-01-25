@@ -1,8 +1,11 @@
 import React from "react";
 import { FaTwitter, FaLinkedinIn, FaGithub } from "react-icons/fa";
 
-const Footer: React.FC = () => (
-  <footer className=" text-white py-12">
+const Footer: React.FC = () => {
+
+  const currentYear = new Date().getFullYear();
+
+  return <footer className=" text-white py-12">
     <div className="container mx-auto px-4">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
@@ -48,10 +51,10 @@ const Footer: React.FC = () => (
         </div>
       </div>
       <div className="mt-8 text-center text-sm">
-        &copy; 2024 dBKash. All rights reserved.
+        &copy; {currentYear} dBKash. All rights reserved.
       </div>
     </div>
   </footer>
-);
+};
 
 export default Footer;
