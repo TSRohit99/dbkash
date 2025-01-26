@@ -28,7 +28,9 @@ This project is proudly developed by [**Rohit Sen**](https://github.com/TSRohit9
 ---
 
 ## ⚡ **High Level System Architecture**
-![diagram-export-1-25-2025-2_16_02-PM](https://github.com/user-attachments/assets/17604cee-0e5c-4e51-ae0e-a7e533d59386)
+![diagram-export-1-26-2025-9_31_25-PM](https://github.com/user-attachments/assets/185e41ab-ecfa-4692-98b6-93b1d7e08e64)
+
+
 
 ---
 
